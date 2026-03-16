@@ -2,8 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>The Last Chord</title>
+    
+    <link rel="apple-touch-icon" href="Logo.jpeg">
+    <link rel="icon" type="image/jpeg" href="Logo.jpeg">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="The Last Chord">
+
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -11,7 +20,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:italic,bold&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #D1E2F2; color: #001F3F; font-family: 'Inter', sans-serif; }
+        body { background-color: #D1E2F2; color: #001F3F; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         .font-serif { font-family: 'Libre Baskerville', serif; }
         .custom-scroll::-webkit-scrollbar { width: 3px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0, 31, 63, 0.2); border-radius: 10px; }
