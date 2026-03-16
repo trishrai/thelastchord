@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:italic,bold&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         body { 
-            background-color: #E6F0FA; /* Pale Retro Blue */
+            background-color: #D1E2F2; /* Steel Blue */
             color: #001F3F; 
             font-family: 'Inter', sans-serif; 
         }
@@ -55,13 +55,41 @@
 
             const renderContent = () => {
                 if (activeTab === 'Home') return (
-                    <div className="flex flex-col items-center justify-center text-center p-6 mt-12 min-h-[60vh]">
-                        <img src="logo.png" alt="The Last Chord" className="max-w-[180px] md:max-w-[250px] mb-8 mix-blend-multiply" onError={(e) => e.target.style.display='none'} />
-                        <h1 className="text-6xl md:text-9xl font-serif mb-6 italic tracking-tighter">The Last Chord</h1>
-                        <p className="max-w-md text-[10px] md:text-xs mb-12 font-light italic opacity-60 uppercase tracking-[0.5em] leading-loose">A Weekly Curation of Music & Culture</p>
-                        <a href="https://thelastchord.substack.com/" target="_blank" className="border border-[#001F3F] px-14 py-5 hover:bg-[#001F3F] hover:text-[#E6F0FA] transition-all uppercase tracking-[0.3em] text-[9px] font-bold">Read On Substack</a>
-                    </div>
-                );
+    <div className="flex flex-col md:flex-row items-center justify-center p-6 min-h-[75vh] gap-12 md:gap-24 animate-in fade-in duration-1000">
+        {/* Left: Branding */}
+        <div className="flex flex-col items-center md:items-start text-center md:text-left">
+            <img src="logo.png" alt="TLC" className="max-w-[180px] md:max-w-[220px] mb-8 mix-blend-multiply" onError={(e) => e.target.style.display='none'} />
+            <h1 className="text-6xl md:text-8xl font-serif italic tracking-tighter leading-tight mb-4">The Last Chord</h1>
+            <p className="max-w-xs text-[10px] uppercase tracking-[0.6em] font-bold opacity-40 mb-10 leading-loose">London / Sound / Digital Culture</p>
+            <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                <button onClick={() => setActiveTab('Songs')} className="border border-[#001F3F] px-10 py-4 hover:bg-[#001F3F] hover:text-[#D1E2F2] transition-all uppercase tracking-[0.3em] text-[9px] font-bold">Catalogue</button>
+                <a href="https://thelastchord.substack.com/" target="_blank" className="bg-[#001F3F] text-[#D1E2F2] px-10 py-4 hover:opacity-80 transition-all uppercase tracking-[0.3em] text-[9px] font-bold">Newsletter</a>
+            </div>
+        </div>
+
+        {/* Vertical Divider Line */}
+        <div className="hidden md:block w-px h-64 bg-[#001F3F]/10"></div>
+        
+        {/* Right: Editorial Sidebar */}
+        <div className="flex flex-col text-left space-y-8 max-w-xs">
+            <h2 className="text-[10px] uppercase tracking-[0.4em] font-bold border-b border-[#001F3F]/20 pb-2 opacity-60">In This Issue</h2>
+            <div className="space-y-6">
+                <div>
+                    <span className="text-[9px] font-serif italic opacity-40 block mb-1">01. Sound</span>
+                    <p className="text-sm italic font-serif leading-snug">The 5-track ritual: Weekly curation for the urban walker.</p>
+                </div>
+                <div>
+                    <span className="text-[9px] font-serif italic opacity-40 block mb-1">02. Space</span>
+                    <p className="text-sm italic font-serif leading-snug">Hidden brutalist gems and concrete quietude in London.</p>
+                </div>
+                <div>
+                    <span className="text-[9px] font-serif italic opacity-40 block mb-1">03. Tech</span>
+                    <p className="text-sm italic font-serif leading-snug">Digital minimalism: Why the 'Slow Web' is regaining pace.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+);
 
                 const listKey = activeTab === 'New In Tech' ? 'Tech' : activeTab;
                 const items = data[listKey] || [];
@@ -110,7 +138,7 @@
                                         <p className="text-[10px] uppercase tracking-widest font-bold opacity-50 mb-8 border-b border-[#E6F0FA]/20 pb-4">{subtitle}</p>
                                         
                                         <div className="mb-8 space-y-1.5 text-[9px] uppercase tracking-[0.2em] opacity-60 italic font-light">
-                                            {item.Album && <p>Volume: {item.Album}</p>}
+                                            {item.Album && <p>Album: {item.Album}</p>}
                                             {item.Year && <p>Release: {item.Year}</p>}
                                             {item.Location && <p>Archived: {item.Location}</p>}
                                         </div>
@@ -137,7 +165,7 @@
             return (
                 <div className="min-h-screen flex flex-col">
                     <nav className="fixed top-0 w-full bg-[#E6F0FA]/90 backdrop-blur-md z-50 px-8 py-6 flex justify-between items-center border-b border-[#001F3F]/10">
-                        <button onClick={() => setActiveTab('Home')} className="font-serif text-3xl font-bold italic tracking-tighter hover:opacity-50 transition-opacity">The Last Chord.</button>
+                        <button onClick={() => setActiveTab('Home')} className="hover:opacity-50 transition-opacity"><img src="logo.png" alt="TLC" className="h-8 md:h-10 mix-blend-multiply" /></button>
                         <div className="text-[9px] uppercase tracking-[0.5em] font-bold px-4 py-1.5 border border-[#001F3F] rounded-full">{activeTab}</div>
                     </nav>
 
