@@ -11,14 +11,29 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:italic,bold&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #F0F7FF; color: #001F3F; font-family: 'Inter', sans-serif; }
+        body { 
+            background-color: #E6F0FA; /* Pale Retro Blue */
+            color: #001F3F; 
+            font-family: 'Inter', sans-serif; 
+        }
         .font-serif { font-family: 'Libre Baskerville', serif; }
-        .custom-scroll::-webkit-scrollbar { width: 2px; }
+        .custom-scroll::-webkit-scrollbar { width: 3px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #F0F7FF; opacity: 0.3; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #E6F0FA; border-radius: 10px; }
+        
+        /* Subtle Paper Texture Effect */
+        .paper-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 9999;
+            background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+        }
     </style>
 </head>
 <body>
+    <div class="paper-overlay"></div>
     <div id="root"></div>
 
     <script type="text/babel">
@@ -39,19 +54,32 @@
                 Object.keys(CSV_LINKS).forEach(key => {
                     Papa.parse(CSV_LINKS[key], {
                         download: true, header: true, skipEmptyLines: true,
-                        complete: (results) => { 
-                            setData(prev => ({ ...prev, [key]: results.data })); 
-                        }
+                        complete: (results) => { setData(prev => ({ ...prev, [key]: results.data })); }
                     });
                 });
             }, []);
 
             const renderContent = () => {
                 if (activeTab === 'Home') return (
-                    <div className="flex flex-col items-center justify-center text-center p-12 mt-20 min-h-[50vh]">
-                        <h1 className="text-7xl md:text-9xl font-serif mb-4 italic tracking-tighter">The Last Chord</h1>
-                        <p className="max-w-lg text-xl mb-12 font-light italic opacity-80 uppercase tracking-widest text-[10px]">A Weekly Curation</p>
-                        <a href="https://thelastchord.substack.com/" target="_blank" className="border border-[#001F3F] px-12 py-5 hover:bg-[#001F3F] hover:text-[#F0F7FF] transition-all uppercase tracking-[0.3em] text-[10px] font-bold">Read Substack</a>
+                    <div className="flex flex-col items-center justify-center text-center p-6 mt-10 min-h-[60vh]">
+                        {/* THE LOGO - Replace 'logo.png' with your actual filename */}
+                        <img 
+                            src="logo.png" 
+                            alt="The Last Chord" 
+                            className="max-w-[200px] md:max-w-[300px] h-auto mb-6 mix-blend-multiply transition-opacity duration-700"
+                            onError={(e) => { e.target.style.display = 'none'; }}
+                        />
+                        
+                        <h1 className="text-5xl md:text-8xl font-serif mb-4 italic tracking-tighter">The Last Chord</h1>
+                        <p className="max-w-md text-[10px] md:text-xs mb-10 font-light italic opacity-60 uppercase tracking-[0.5em] leading-loose">
+                            London / Music / Digital Culture
+                        </p>
+                        
+                        <div className="flex gap-4">
+                            <a href="https://thelastchord.substack.com/" target="_blank" className="border border-[#001F3F] px-10 py-4 hover:bg-[#001F3F] hover:text-[#E6F0FA] transition-all uppercase tracking-[0.3em] text-[9px] font-bold">
+                                Read Latest Issue
+                            </a>
+                        </div>
                     </div>
                 );
 
@@ -61,11 +89,11 @@
 
                 if (isListView) {
                     return (
-                        <div className="flex flex-col max-w-4xl mx-auto px-6 pb-60 space-y-12 mt-10">
+                        <div className="flex flex-col max-w-2xl mx-auto px-6 pb-64 space-y-20 mt-16">
                             {items.map((item, i) => (
-                                <a href={item.Link} target="_blank" key={i} className="group border-b border-[#001F3F]/10 pb-8 block transition-all">
-                                    <h2 className="font-serif text-3xl italic mb-2 group-hover:underline underline-offset-8 decoration-1">{item.Title}</h2>
-                                    <p className="text-sm font-light leading-relaxed opacity-70 italic mb-4">"{item.Summary}"</p>
+                                <a href={item.Link} target="_blank" key={i} className="group block text-center border-b border-[#001F3F]/10 pb-12">
+                                    <h2 className="font-serif text-3xl italic mb-4 group-hover:opacity-50 transition-all underline-offset-4 decoration-1">{item.Title}</h2>
+                                    <p className="text-xs font-light leading-relaxed opacity-60 italic max-w-md mx-auto">"{item.Summary}"</p>
                                 </a>
                             ))}
                         </div>
@@ -73,83 +101,20 @@
                 }
 
                 return (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0.5 bg-[#001F3F]/5 p-0.5 pb-80">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0.5 bg-[#001F3F]/10 p-0.5 pb-80">
                         {items.map((item, i) => {
                             const title = item.Title || item.Name;
                             const subtitle = item.Artist || item.Category;
                             const link = item.Spotify || item.Link;
-                            const img = item.Image;
-                            
-                            // Flexible logic: priority to Review (Songs) then Description (London)
-                            const description = item.Review || item.Review || item.Description || item.description || "";
+                            const description = item.Review || item.Description || item.description || "";
 
                             return (
-                                <div key={i} className="group relative overflow-hidden h-[500px] bg-white">
-                                    {/* Image Layer */}
-                                    <div className="absolute top-0 left-0 w-full h-full group-hover:h-[35%] transition-all duration-700 z-10 overflow-hidden">
-                                        {img && <img src={img} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-110 group-hover:scale-100" />}
+                                <div key={i} className="group relative overflow-hidden h-[550px] bg-white">
+                                    <div className="absolute inset-0 z-10 transition-transform duration-700 group-hover:scale-105">
+                                        {item.Image && <img src={item.Image} className="w-full h-full object-cover grayscale" />}
                                     </div>
 
-                                    {/* Resting Label */}
-                                    <div className="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-[#F0F7FF] via-[#F0F7FF]/90 to-transparent group-hover:opacity-0 transition-all duration-500 z-20">
-                                        <h3 className="font-serif text-2xl italic leading-tight">{title}</h3>
-                                        <p className="text-[10px] uppercase tracking-widest font-bold opacity-60">{subtitle}</p>
-                                    </div>
-
-                                    {/* Hover Panel */}
-                                    <div className="absolute bottom-0 left-0 w-full h-0 group-hover:h-[65%] bg-[#001F3F] transition-all duration-700 z-40 flex flex-col p-8 text-[#F0F7FF] overflow-hidden">
-                                        <div className="relative z-50 flex flex-col h-full opacity-0 group-hover:opacity-100 transition-opacity delay-200">
-                                            <h3 className="font-serif text-2xl italic mb-1">{title}</h3>
-                                            <p className="text-[10px] uppercase tracking-widest font-bold opacity-50 mb-4">{subtitle}</p>
-                                            
-                                            <div className="mb-4 space-y-1">
-                                                {item.Album && <p className="text-[10px] italic opacity-80 uppercase tracking-widest">Album: {item.Album}</p>}
-                                                {item.Year && <p className="text-[10px] font-bold opacity-60 uppercase tracking-widest">Year: {item.Year}</p>}
-                                                {item.Location && <p className="text-[10px] italic opacity-80 uppercase tracking-widest">{item.Location}</p>}
-                                            </div>
-
-                                            <div className="flex-grow overflow-y-auto custom-scroll mb-4 pr-2">
-                                                <p className="text-xs font-light leading-relaxed italic opacity-95">
-                                                    {description ? `"${description}"` : ""}
-                                                </p>
-                                            </div>
-
-                                            {link && (
-                                                <a href={link} target="_blank" className="text-[10px] border border-[#F0F7FF] px-6 py-3 hover:bg-[#F0F7FF] hover:text-[#001F3F] transition-colors uppercase tracking-[0.2em] font-bold text-center mt-auto">
-                                                    {activeTab === 'Songs' ? "Listen on Spotify" : "View Location"}
-                                                </a>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                );
-            };
-
-            return (
-                <div className="min-h-screen flex flex-col">
-                    <nav className="fixed top-0 w-full bg-[#F0F7FF]/95 backdrop-blur-md z-50 px-8 py-5 flex justify-between items-center border-b border-[#001F3F]/10">
-                        <button onClick={() => setActiveTab('Home')} className="font-serif text-3xl font-bold italic tracking-tighter hover:opacity-50 transition-opacity">TLC.</button>
-                        <div className="text-[9px] uppercase tracking-[0.5em] font-bold px-4 py-1.5 border border-[#001F3F] rounded-full">{activeTab}</div>
-                    </nav>
-                    <main className="pt-24 flex-grow mx-auto w-full max-w-[1600px]">
-                        {renderContent()}
-                    </main>
-                    <footer className="fixed bottom-0 w-full bg-[#F0F7FF]/95 backdrop-blur-md border-t border-[#001F3F]/10 flex justify-around p-6 text-[9px] uppercase font-bold tracking-[0.2em] z-50">
-                        {['Home', 'Songs', 'London', 'Articles', 'New In Tech'].map(tab => (
-                            <button key={tab} onClick={() => setActiveTab(tab)} className={activeTab === tab ? "text-[#001F3F] border-b border-[#001F3F]" : "opacity-30 hover:opacity-100 transition-all"}>
-                                {tab}
-                            </button>
-                        ))}
-                    </footer>
-                </div>
-            );
-        };
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
-</body>
-</html>
+                                    {/* Full Navy Hover Overlay */}
+                                    <div className="absolute inset-0 bg-[#001F3F] opacity-0 group-hover:opacity-100 transition-opacity duration-400 z-30 flex flex-col p-10 text-[#E6F0FA]">
+                                        <h3 className="font-serif text-3xl italic mb-1">{title}</h3>
+                                        <p className="
