@@ -59,7 +59,7 @@
                     <div className="flex flex-col items-center justify-center p-6 min-h-[75vh] text-center">
                         <div className="mb-12 animate-fade-in">
                              <h1 className="text-6xl md:text-8xl font-serif italic tracking-tighter leading-none">The Last Chord</h1>
-                             <p className="text-[10px] uppercase tracking-[0.6em] font-bold opacity-40 mt-6 leading-loose">BY TRISHA RAI // EST. 2025</p>
+                             <p className="text-[10px] uppercase tracking-[0.6em] font-bold opacity-40 mt-6 leading-loose">BY TRISHA RAI | EST. 2025</p>
                         </div>
                         <div className="flex flex-col items-center space-y-8 animate-fade-in delay-1">
                             <div className="group relative">
@@ -72,15 +72,15 @@
                 );
 
                 const items = data[activeTab === 'New In Tech' ? 'Tech' : activeTab] || [];
-                
-                // Keep ONLY "New In Tech" as the text-list view, move Articles to Visual Grid
-                const isListView = activeTab === 'New In Tech';
 
                 return (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-layout p-0.5 pb-80 mt-4">
                         {items.map((item, i) => {
                             const title = item.title || item.name || "Untitled";
-                            const sub = item.artist || item.category || (activeTab === 'Articles' ? 'Editorial' : '');
+                            let sub = item.artist || item.category || "";
+                            if (!sub && activeTab === 'Articles') sub = 'Editorial';
+                            if (!sub && activeTab === 'New In Tech') sub = 'Technology';
+
                             const img = item.image || "";
                             const finalLink = item.spotify || item.link || item.url;
                             const bodyText = item.review || item.description || item.summary || "";
@@ -89,23 +89,13 @@
                             const year = item.year || "";
                             const location = item.location || "";
 
-                            if (isListView) return (
-                                <a href={finalLink} target="_blank" key={i} className="group bg-[#D1E2F2] p-10 flex flex-col justify-between hover:bg-[#001F3F] hover:text-[#D1E2F2] transition-all duration-300 min-h-[300px] border border-[#001F3F]/5">
-                                    <div>
-                                        <h2 className="font-serif text-2xl italic mb-6 leading-tight">{title}</h2>
-                                        <p className="text-[11px] font-light leading-relaxed opacity-60 italic group-hover:opacity-80">"{bodyText}"</p>
-                                    </div>
-                                    <div className="mt-8 text-[9px] uppercase tracking-widest font-bold opacity-40 group-hover:opacity-100">Read Entry →</div>
-                                </a>
-                            );
-
                             return (
                                 <div key={i} className="group relative overflow-hidden h-[550px] bg-white">
                                     <div className="absolute inset-0 z-10">
                                         {img ? (
                                             <img src={img} className="w-full h-full object-cover grayscale opacity-90 transition-transform duration-700 group-hover:scale-110" />
                                         ) : (
-                                            <div className="w-full h-full bg-[#001F3F]/5 flex items-center justify-center text-[10px] uppercase tracking-widest opacity-20">No Image provided</div>
+                                            <div className="w-full h-full bg-[#001F3F]/5 flex items-center justify-center text-[10px] uppercase tracking-widest opacity-20">No Image Provided</div>
                                         )}
                                     </div>
                                     <div className="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-white via-white/80 to-transparent z-20 group-hover:opacity-0 transition-opacity duration-300">
@@ -130,7 +120,8 @@
 
                                         {finalLink && (
                                             <a href={finalLink} target="_blank" className="mt-auto border border-[#E6F0FA] py-4 text-[9px] uppercase tracking-[0.4em] font-bold text-center hover:bg-[#E6F0FA] hover:text-[#001F3F] transition-all">
-                                                Read Full Article
+                                                {activeTab === 'Songs' ? "Listen on Spotify" : 
+                                                 activeTab === 'New In Tech' ? "Read Source" : "Read Full Article"}
                                             </a>
                                         )}
                                     </div>
