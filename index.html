@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>The Last Chord</title>
     
-    <link rel="apple-touch-icon" href="Logo.jpeg">
-    <link rel="icon" type="image/jpeg" href="Logo.jpeg">
+    <link rel="apple-touch-icon" href="https://trishrai.github.io/thelastchord/Logo.jpeg">
+    <link rel="icon" type="image/jpeg" href="https://trishrai.github.io/thelastchord/Logo.jpeg">
 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -19,6 +19,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:italic,bold&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    
     <style>
         body { background-color: #D1E2F2; color: #001F3F; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         .font-serif { font-family: 'Libre Baskerville', serif; }
@@ -97,11 +98,9 @@
                             let sub = item.artist || item.category || "";
                             if (!sub && activeTab === 'Articles') sub = 'Editorial';
                             if (!sub && activeTab === 'New In Tech') sub = 'Technology';
-
                             const img = item.image || "";
                             const finalLink = item.spotify || item.link || item.url;
                             const bodyText = item.review || item.description || item.summary || "";
-                            
                             const album = item.album || "";
                             const year = item.year || "";
                             const location = item.location || "";
@@ -148,18 +147,15 @@
                     <nav className="fixed top-0 w-full bg-[#D1E2F2]/90 backdrop-blur-md z-50 px-8 py-4 flex justify-between items-center border-b border-[#001F3F]/10">
                         <div className="flex items-center">
                             <button onClick={() => setActiveTab('Home')} className="hover:opacity-70 transition-opacity">
-                                <img src="Logo.jpeg" alt="TLC" className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover border border-[#001F3F]/20 shadow-sm" />
+                                <img src="https://trishrai.github.io/thelastchord/Logo.jpeg" alt="TLC" className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover border border-[#001F3F]/20 shadow-sm" />
                             </button>
                         </div>
-                        
-                        {/* THE MISSING HEADER SECTION */}
-                        <div className="hidden lg:block">
+                        <div className="hidden lg:block text-center flex-grow">
                             <h2 className="text-[9px] md:text-[10px] uppercase tracking-[0.4em] font-bold opacity-70">
                                 {getPageHeader(activeTab)}
                             </h2>
                         </div>
-
-                        <div className="text-[9px] uppercase tracking-[0.5em] font-bold px-4 py-1.5 border border-[#001F3F] rounded-full">
+                        <div className="text-[9px] uppercase tracking-[0.5em] font-bold px-4 py-1.5 border border-[#001F3F] rounded-full ml-auto">
                             {activeTab}
                         </div>
                     </nav>
