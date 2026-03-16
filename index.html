@@ -56,7 +56,7 @@
             const renderContent = () => {
                 if (activeTab === 'Home') return (
                     <div className="flex flex-col items-center justify-center text-center p-6 mt-12 min-h-[60vh]">
-                        <img src="logo.png" alt="TLC" className="max-w-[180px] md:max-w-[250px] mb-8 mix-blend-multiply" onError={(e) => e.target.style.display='none'} />
+                        <img src="logo.png" alt="The Last Chord" className="max-w-[180px] md:max-w-[250px] mb-8 mix-blend-multiply" onError={(e) => e.target.style.display='none'} />
                         <h1 className="text-6xl md:text-9xl font-serif mb-6 italic tracking-tighter">The Last Chord</h1>
                         <p className="max-w-md text-[10px] md:text-xs mb-12 font-light italic opacity-60 uppercase tracking-[0.5em] leading-loose">A Weekly Curation of Music & Culture</p>
                         <a href="https://thelastchord.substack.com/" target="_blank" className="border border-[#001F3F] px-14 py-5 hover:bg-[#001F3F] hover:text-[#E6F0FA] transition-all uppercase tracking-[0.3em] text-[9px] font-bold">Read On Substack</a>
@@ -137,7 +137,7 @@
             return (
                 <div className="min-h-screen flex flex-col">
                     <nav className="fixed top-0 w-full bg-[#E6F0FA]/90 backdrop-blur-md z-50 px-8 py-6 flex justify-between items-center border-b border-[#001F3F]/10">
-                        <button onClick={() => setActiveTab('Home')} className="font-serif text-3xl font-bold italic tracking-tighter hover:opacity-50 transition-opacity">TLC.</button>
+                        <button onClick={() => setActiveTab('Home')} className="font-serif text-3xl font-bold italic tracking-tighter hover:opacity-50 transition-opacity">The Last Chord.</button>
                         <div className="text-[9px] uppercase tracking-[0.5em] font-bold px-4 py-1.5 border border-[#001F3F] rounded-full">{activeTab}</div>
                     </nav>
 
