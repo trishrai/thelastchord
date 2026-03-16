@@ -39,7 +39,9 @@
                 Object.keys(CSV_LINKS).forEach(key => {
                     Papa.parse(CSV_LINKS[key], {
                         download: true, header: true, skipEmptyLines: true,
-                        complete: (results) => { setData(prev => ({ ...prev, [key]: results.data })); }
+                        complete: (results) => { 
+                            setData(prev => ({ ...prev, [key]: results.data })); 
+                        }
                     });
                 });
             }, []);
@@ -77,24 +79,26 @@
                             const subtitle = item.Artist || item.Category;
                             const link = item.Spotify || item.Link;
                             const img = item.Image;
-                            const description = item.Review || item.Description || item.description || "";
+                            
+                            // Flexible logic: priority to Review (Songs) then Description (London)
+                            const description = item.Review || item.Review || item.Description || item.description || "";
 
                             return (
                                 <div key={i} className="group relative overflow-hidden h-[500px] bg-white">
-                                    {/* Image Container - Stays at top 35% on hover */}
-                                    <div className="absolute top-0 left-0 w-full h-full group-hover:h-[35%] transition-all duration-500 z-10 overflow-hidden bg-black">
-                                        {img && <img src={img} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-105 group-hover:scale-100" />}
+                                    {/* Image Layer */}
+                                    <div className="absolute top-0 left-0 w-full h-full group-hover:h-[35%] transition-all duration-700 z-10 overflow-hidden">
+                                        {img && <img src={img} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-110 group-hover:scale-100" />}
                                     </div>
 
-                                    {/* Resting Title Label - Fades out immediately on hover */}
-                                    <div className="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-[#F0F7FF] via-[#F0F7FF]/90 to-transparent group-hover:hidden z-20 transition-opacity">
+                                    {/* Resting Label */}
+                                    <div className="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-[#F0F7FF] via-[#F0F7FF]/90 to-transparent group-hover:opacity-0 transition-all duration-500 z-20">
                                         <h3 className="font-serif text-2xl italic leading-tight">{title}</h3>
                                         <p className="text-[10px] uppercase tracking-widest font-bold opacity-60">{subtitle}</p>
                                     </div>
 
-                                    {/* Navy Hover Panel - Absolutely positioned to slide up from the bottom */}
-                                    <div className="absolute bottom-0 left-0 w-full h-0 group-hover:h-[65%] bg-[#001F3F] transition-all duration-500 ease-out z-30 flex flex-col p-8 text-[#F0F7FF] overflow-hidden">
-                                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-150 flex flex-col h-full">
+                                    {/* Hover Panel */}
+                                    <div className="absolute bottom-0 left-0 w-full h-0 group-hover:h-[65%] bg-[#001F3F] transition-all duration-700 z-40 flex flex-col p-8 text-[#F0F7FF] overflow-hidden">
+                                        <div className="relative z-50 flex flex-col h-full opacity-0 group-hover:opacity-100 transition-opacity delay-200">
                                             <h3 className="font-serif text-2xl italic mb-1">{title}</h3>
                                             <p className="text-[10px] uppercase tracking-widest font-bold opacity-50 mb-4">{subtitle}</p>
                                             
@@ -133,7 +137,7 @@
                     <main className="pt-24 flex-grow mx-auto w-full max-w-[1600px]">
                         {renderContent()}
                     </main>
-                    <footer className="fixed bottom-0 w-full bg-[#F0F7FF]/95 backdrop-blur-md border-t border-[#001F3F]/10 flex justify-around p-6 text-[9px] uppercase font-bold tracking-[0.2em] z-50 shadow-sm">
+                    <footer className="fixed bottom-0 w-full bg-[#F0F7FF]/95 backdrop-blur-md border-t border-[#001F3F]/10 flex justify-around p-6 text-[9px] uppercase font-bold tracking-[0.2em] z-50">
                         {['Home', 'Songs', 'London', 'Articles', 'New In Tech'].map(tab => (
                             <button key={tab} onClick={() => setActiveTab(tab)} className={activeTab === tab ? "text-[#001F3F] border-b border-[#001F3F]" : "opacity-30 hover:opacity-100 transition-all"}>
                                 {tab}
