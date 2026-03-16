@@ -90,7 +90,7 @@
                         {isListView ? (
                             <div className="flex flex-col max-w-2xl mx-auto px-6 pb-64 space-y-24 mt-16">
                                 {items.map((item, i) => (
-                                    <a href={item.Link} target="_blank" key={i} className="group block text-center border-b border-[#001F3F]/10 pb-16">
+                                    <a href={item.Link || item.link} target="_blank" key={i} className="group block text-center border-b border-[#001F3F]/10 pb-16">
                                         <h2 className="font-serif text-4xl italic mb-6 group-hover:opacity-50 transition-all leading-tight">{item.Title}</h2>
                                         <p className="text-xs font-light leading-relaxed opacity-60 italic max-w-md mx-auto">"{item.Summary}"</p>
                                     </a>
@@ -101,8 +101,10 @@
                                 {items.map((item, i) => {
                                     const title = item.Title || item.Name;
                                     const subtitle = item.Artist || item.Category;
-                                    const link = item.Spotify || item.Link;
+                                    // Robust link detection for London and Songs
+                                    const finalLink = item.Link || item.link || item.Spotify || item.spotify;
                                     const description = item.Review || item.Description || item.description || "";
+                                    
                                     return (
                                         <div key={i} className="group relative overflow-hidden h-[550px] bg-white">
                                             <div className="absolute inset-0 z-10">
@@ -125,8 +127,8 @@
                                                         {description ? `"${description}"` : "Entry awaiting review."}
                                                     </p>
                                                 </div>
-                                                {link && (
-                                                    <a href={link} target="_blank" className="mt-auto border border-[#E6F0FA] py-4 text-[9px] uppercase tracking-[0.4em] font-bold text-center hover:bg-[#E6F0FA] hover:text-[#001F3F] transition-all">
+                                                {finalLink && (
+                                                    <a href={finalLink} target="_blank" className="mt-auto border border-[#E6F0FA] py-4 text-[9px] uppercase tracking-[0.4em] font-bold text-center hover:bg-[#E6F0FA] hover:text-[#001F3F] transition-all">
                                                         {activeTab === 'Songs' ? "Listen on Spotify" : "Visit Website"}
                                                     </a>
                                                 )}
@@ -143,7 +145,6 @@
             return (
                 <div className="min-h-screen flex flex-col">
                     <nav className="fixed top-0 w-full bg-[#D1E2F2]/90 backdrop-blur-md z-50 px-8 py-4 flex justify-between items-center border-b border-[#001F3F]/10">
-                        {/* Left: Logo updated to .jpeg */}
                         <div className="flex items-center">
                             <button onClick={() => setActiveTab('Home')} className="hover:opacity-70 transition-opacity">
                                 <img 
@@ -154,15 +155,11 @@
                                 />
                             </button>
                         </div>
-
-                        {/* Center: Dynamic Page Header */}
                         <div className="hidden lg:block">
                             <h2 className="text-[9px] md:text-[10px] uppercase tracking-[0.4em] font-bold opacity-70">
                                 {getPageHeader(activeTab)}
                             </h2>
                         </div>
-
-                        {/* Right: Current Tab Name */}
                         <div className="text-[9px] uppercase tracking-[0.5em] font-bold px-4 py-1.5 border border-[#001F3F] rounded-full">
                             {activeTab}
                         </div>
