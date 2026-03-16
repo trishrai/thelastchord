@@ -50,6 +50,7 @@
             }, []);
 
             const getPageHeader = (tab) => {
+                if (tab === 'Home') return "";
                 switch(tab) {
                     case 'Songs': return "SONG RECOMMENDATIONS FROM THE LAST CHORD";
                     case 'London': return "LONDON RECOMMENDATIONS FROM THE LAST CHORD";
@@ -86,15 +87,8 @@
 
                 return (
                     <div className="flex flex-col w-full">
-                        {/* Centered Tab Header */}
-                        <div className="w-full text-center py-12 px-6">
-                            <h2 className="text-[11px] md:text-xs uppercase tracking-[0.5em] font-bold opacity-80 border-b border-[#001F3F]/10 pb-6 inline-block">
-                                {getPageHeader(activeTab)}
-                            </h2>
-                        </div>
-
                         {isListView ? (
-                            <div className="flex flex-col max-w-2xl mx-auto px-6 pb-64 space-y-24 mt-8">
+                            <div className="flex flex-col max-w-2xl mx-auto px-6 pb-64 space-y-24 mt-16">
                                 {items.map((item, i) => (
                                     <a href={item.Link} target="_blank" key={i} className="group block text-center border-b border-[#001F3F]/10 pb-16">
                                         <h2 className="font-serif text-4xl italic mb-6 group-hover:opacity-50 transition-all leading-tight">{item.Title}</h2>
@@ -149,15 +143,29 @@
             return (
                 <div className="min-h-screen flex flex-col">
                     <nav className="fixed top-0 w-full bg-[#D1E2F2]/90 backdrop-blur-md z-50 px-8 py-4 flex justify-between items-center border-b border-[#001F3F]/10">
-                        <button onClick={() => setActiveTab('Home')} className="hover:opacity-70 transition-opacity">
-                            <img 
-                                src="Logo.jpeg" 
-                                alt="TLC Logo" 
-                                className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover border border-[#001F3F]/20 shadow-sm"
-                                onError={(e) => { e.target.src='https://via.placeholder.com/50?text=TLC'; }} 
-                            />
-                        </button>
-                        <div className="text-[9px] uppercase tracking-[0.5em] font-bold px-4 py-1.5 border border-[#001F3F] rounded-full">{activeTab}</div>
+                        {/* Left: Logo */}
+                        <div className="flex items-center">
+                            <button onClick={() => setActiveTab('Home')} className="hover:opacity-70 transition-opacity">
+                                <img 
+                                    src="Logo.jpg" 
+                                    alt="TLC Logo" 
+                                    className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover border border-[#001F3F]/20 shadow-sm"
+                                    onError={(e) => { e.target.src='https://via.placeholder.com/50?text=TLC'; }} 
+                                />
+                            </button>
+                        </div>
+
+                        {/* Center: Dynamic Page Header */}
+                        <div className="hidden lg:block">
+                            <h2 className="text-[9px] md:text-[10px] uppercase tracking-[0.4em] font-bold opacity-70">
+                                {getPageHeader(activeTab)}
+                            </h2>
+                        </div>
+
+                        {/* Right: Current Tab Name */}
+                        <div className="text-[9px] uppercase tracking-[0.5em] font-bold px-4 py-1.5 border border-[#001F3F] rounded-full">
+                            {activeTab}
+                        </div>
                     </nav>
 
                     <main className="pt-24 flex-grow mx-auto w-full max-w-[1600px]">
