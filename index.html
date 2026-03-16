@@ -118,7 +118,7 @@
                                                 <div className="mb-8 space-y-1.5 text-[9px] uppercase tracking-[0.2em] opacity-60 italic font-light">
                                                     {item.Album && <p>Album: {item.Album}</p>}
                                                     {item.Year && <p>Release: {item.Year}</p>}
-                                                    {item.Location && <p>Archived: {item.Location}</p>}
+                                                    {item.Location && <p>Postcode: {item.Location}</p>}
                                                 </div>
                                                 <div className="flex-grow overflow-y-auto custom-scroll mb-8 pr-4">
                                                     <p className="text-xs font-light leading-relaxed italic opacity-90">
@@ -147,7 +147,7 @@
                         <div className="flex items-center">
                             <button onClick={() => setActiveTab('Home')} className="hover:opacity-70 transition-opacity">
                                 <img 
-                                    src="Logo.jpg" 
+                                    src="Logo.jpeg" 
                                     alt="TLC Logo" 
                                     className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover border border-[#001F3F]/20 shadow-sm"
                                     onError={(e) => { e.target.src='https://via.placeholder.com/50?text=TLC'; }} 
