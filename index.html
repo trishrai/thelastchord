@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:italic,bold&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         body { 
-            background-color: #D1E2F2; /* Refined Steel Blue */
+            background-color: #D1E2F2; 
             color: #001F3F; 
             font-family: 'Inter', sans-serif; 
         }
@@ -51,29 +51,26 @@
 
             const renderContent = () => {
                 if (activeTab === 'Home') return (
-                    <div className="flex flex-col md:flex-row items-center justify-center p-6 min-h-[75vh] gap-12 md:gap-24 animate-in fade-in duration-1000">
-                        {/* Left Side: Editorial Intro */}
-                        <div className="flex flex-col items-center md:items-start text-center md:text-left">
-                            <h1 className="text-7xl md:text-9xl font-serif italic tracking-tighter leading-none mb-6">The Last Chord</h1>
-                            <p className="max-w-xs text-[10px] uppercase tracking-[0.6em] font-bold opacity-40 mb-10 leading-loose">London / Sound / Digital Culture</p>
-                            <div className="flex gap-4">
-                                <button onClick={() => setActiveTab('Songs')} className="border border-[#001F3F] px-10 py-4 hover:bg-[#001F3F] hover:text-[#D1E2F2] transition-all uppercase tracking-[0.3em] text-[9px] font-bold">Open Archive</button>
-                            </div>
+                    <div className="flex flex-col items-center justify-center p-6 min-h-[75vh] text-center animate-in fade-in duration-1000">
+                        {/* Central Visual Branding */}
+                        <div className="mb-12">
+                             <h1 className="text-7xl md:text-[10rem] font-serif italic tracking-tighter leading-none">The Last Chord</h1>
+                             <p className="text-[10px] uppercase tracking-[0.6em] font-bold opacity-40 mt-4 leading-loose">London / Sound / Digital Culture</p>
                         </div>
 
-                        {/* Right Side: Featured Cover Image */}
-                        <div className="relative group w-full max-w-[380px] aspect-[3/4] overflow-hidden bg-white shadow-2xl border border-[#001F3F]/10">
-                            {data.Songs.length > 0 ? (
-                                <img 
-                                    src={data.Songs[0].Image} 
-                                    className="w-full h-full object-cover grayscale contrast-110 hover:scale-105 transition-transform duration-1000" 
-                                />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center italic opacity-20">Retrieving Issue...</div>
-                            )}
-                            <div className="absolute bottom-4 left-4 text-[#E6F0FA] mix-blend-difference">
-                                <p className="text-[10px] uppercase tracking-widest font-bold">Cover Story: No. 01</p>
+                        <div className="flex flex-col items-center space-y-8">
+                            {/* The Substack Link Section */}
+                            <div className="group relative">
+                                <a href="https://thelastchord.substack.com" target="_blank" className="block border border-[#001F3F] px-16 py-6 hover:bg-[#001F3F] hover:text-[#D1E2F2] transition-all uppercase tracking-[0.4em] text-[10px] font-bold relative z-10">
+                                    Read On Substack
+                                </a>
+                                {/* Decorative shadow element */}
+                                <div className="absolute top-2 left-2 w-full h-full border border-[#001F3F]/10 -z-0"></div>
                             </div>
+
+                            <p className="max-w-xs text-[11px] italic font-serif opacity-60 leading-relaxed">
+                                Curated dispatches on the intersection of urban life and the digital frontier.
+                            </p>
                         </div>
                     </div>
                 );
@@ -118,7 +115,7 @@
                                         <div className="mb-8 space-y-1.5 text-[9px] uppercase tracking-[0.2em] opacity-60 italic font-light">
                                             {item.Album && <p>Album: {item.Album}</p>}
                                             {item.Year && <p>Release: {item.Year}</p>}
-                                            {item.Location && <p>Archived: {item.Location}</p>}
+                                            {item.Location && <p>Postcode: {item.Location}</p>}
                                         </div>
                                         <div className="flex-grow overflow-y-auto custom-scroll mb-8 pr-4">
                                             <p className="text-xs font-light leading-relaxed italic opacity-90">
@@ -141,9 +138,14 @@
             return (
                 <div className="min-h-screen flex flex-col">
                     <nav className="fixed top-0 w-full bg-[#D1E2F2]/90 backdrop-blur-md z-50 px-8 py-4 flex justify-between items-center border-b border-[#001F3F]/10">
-                        {/* Circular Record Logo in Top Left */}
+                        {/* Logo updated to .jpeg and removed blend mode to ensure visibility */}
                         <button onClick={() => setActiveTab('Home')} className="hover:opacity-70 transition-opacity">
-                            <img src="Logo.jpg" alt="TLC" className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover border border-[#001F3F]/10 shadow-sm" />
+                            <img 
+                                src="Logo.jpeg" 
+                                alt="TLC Logo" 
+                                className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover border border-[#001F3F]/20 shadow-sm"
+                                onError={(e) => { e.target.src='https://via.placeholder.com/50?text=TLC'; }} 
+                            />
                         </button>
                         <div className="text-[9px] uppercase tracking-[0.5em] font-bold px-4 py-1.5 border border-[#001F3F] rounded-full">{activeTab}</div>
                     </nav>
