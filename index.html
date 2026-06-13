@@ -18,7 +18,7 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:italic,bold&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:italic,bold&family=Inter:wght=300;400;700&display=swap" rel="stylesheet">
     
     <style>
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; transition: background-color 0.4s ease, color 0.4s ease; }
@@ -36,11 +36,8 @@
         const { useState, useEffect, useMemo } = React;
 
         const App = () => {
-            // Check localStorage for prior tab preferences, or grab from URL hash parameter if shared
+            // Load persistent tab states
             const [activeTab, setActiveTab] = useState(() => {
-                const params = new URLSearchParams(window.location.hash.split('?')[1]);
-                const sharedTab = params.get('tab');
-                if (sharedTab) return sharedTab;
                 return localStorage.getItem('tlc_active_tab') || 'Home';
             });
             
@@ -48,8 +45,14 @@
                 return localStorage.getItem('tlc_dark_mode') === 'true';
             });
 
+            // Load global collection framework state from local cache
+            const [favorites, setFavorites] = useState(() => {
+                const cachedData = localStorage.getItem('tlc_favorites');
+                return cachedData ? JSON.parse(cachedData) : [];
+            });
+
             const [searchQuery, setSearchQuery] = useState('');
-            const [copiedId, setCopiedId] = useState(null);
+            const [showOnlyFavs, setShowOnlyFavs] = useState(false);
             const [data, setData] = useState({ Songs: [], London: [], Articles: [], Tech: [] });
 
             const CSV_LINKS = {
@@ -59,25 +62,21 @@
                 Tech: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1956240315&single=true&output=csv"
             };
 
-           
-            useEffect(() => {
-                const params = new URLSearchParams(window.location.hash.split('?')[1]);
-                const sharedItem = params.get('item');
-                if (sharedItem) {
-                    setSearchQuery(decodeURIComponent(sharedItem));
-                }
-            }, []);
-
-         
+            // Save basic settings to cache
             useEffect(() => {
                 localStorage.setItem('tlc_active_tab', activeTab);
                 setSearchQuery(''); 
+                setShowOnlyFavs(false); // Default to full tab contents when switching channels
             }, [activeTab]);
 
-            
             useEffect(() => {
                 localStorage.setItem('tlc_dark_mode', darkMode);
             }, [darkMode]);
+
+            // Save favorites array structural updates to cache
+            useEffect(() => {
+                localStorage.setItem('tlc_favorites', JSON.stringify(favorites));
+            }, [favorites]);
 
             useEffect(() => {
                 Object.keys(CSV_LINKS).forEach(key => {
@@ -95,7 +94,7 @@
                 });
             }, []);
 
-           
+            // Dynamic layout styles matrix
             const theme = {
                 bg: darkMode ? 'bg-[#121212]' : 'bg-[#D1E2F2]',
                 navBg: darkMode ? 'bg-[#121212]/90' : 'bg-[#D1E2F2]/90',
@@ -119,10 +118,34 @@
                 }
             };
 
-      
+            // Toggle favorite storage mechanism
+            const toggleFavorite = (itemTitle) => {
+                const compositeKey = `${activeTab}-${itemTitle}`;
+                if (favorites.includes(compositeKey)) {
+                    setFavorites(prev => prev.filter(k => k !== compositeKey));
+                } else {
+                    setFavorites(prev => [...prev, compositeKey]);
+                }
+            };
+
+            // Compute active favorites subset total count matching current tab
+            const activeTabFavCount = useMemo(() => {
+                return favorites.filter(k => k.startsWith(`${activeTab}-`)).length;
+            }, [favorites, activeTab]);
+
+            // Deep combined filtering pipeline (Search + Collection filters)
             const filteredItems = useMemo(() => {
                 const currentTabKey = activeTab === 'New In Tech' ? 'Tech' : activeTab;
-                const items = data[currentTabKey] || [];
+                let items = data[currentTabKey] || [];
+
+                // Filter down if 'My Collection' mode is turned on
+                if (showOnlyFavs) {
+                    items = items.filter(item => {
+                        const title = item.title || item.name || "Untitled";
+                        return favorites.includes(`${activeTab}-${title}`);
+                    });
+                }
+
                 if (!searchQuery.trim()) return items;
 
                 const query = searchQuery.toLowerCase().trim();
@@ -132,20 +155,7 @@
                     const bodyText = (item.review || item.description || item.summary || "").toLowerCase();
                     return title.includes(query) || sub.includes(query) || bodyText.includes(query);
                 });
-            }, [data, activeTab, searchQuery]);
-
-            const handleShare = (e, title) => {
-                e.preventDefault();
-                e.stopPropagation();
-                
-        
-                const secureUrl = `${window.location.origin}${window.location.pathname}#page?tab=${activeTab}&item=${encodeURIComponent(title)}`;
-                
-                navigator.clipboard.writeText(secureUrl).then(() => {
-                    setCopiedId(title);
-                    setTimeout(() => setCopiedId(null), 2000);
-                });
-            };
+            }, [data, activeTab, searchQuery, showOnlyFavs, favorites]);
 
             const renderContent = () => {
                 if (activeTab === 'Home') return (
@@ -165,96 +175,127 @@
 
                 return (
                     <div className="flex flex-col w-full">
-                        {/* Search Input Bar */}
-                        <div className={`w-full px-4 md:px-8 max-w-md mx-auto mb-6 mt-2 animate-fade-in`}>
+                        {/* Interactive Control Dashboard Deck */}
+                        <div className="w-full px-4 md:px-8 max-w-xl mx-auto mb-8 mt-2 flex flex-col items-center space-y-4 animate-fade-in">
+                            
+                            {/* Standard Sub-Navigation Collection Toggles */}
+                            <div className="flex items-center space-x-6 text-[10px] uppercase tracking-[0.2em] font-bold">
+                                <button 
+                                    onClick={() => setShowOnlyFavs(false)}
+                                    className={`pb-1 transition-all ${!showOnlyFavs ? `border-b ${darkMode ? 'border-[#F5EFE6]' : 'border-[#001F3F]'}` : 'opacity-40 hover:opacity-100'}`}
+                                >
+                                    All Items
+                                </button>
+                                <button 
+                                    onClick={() => setShowOnlyFavs(true)}
+                                    className={`pb-1 transition-all flex items-center space-x-1.5 ${showOnlyFavs ? `border-b ${darkMode ? 'border-[#F5EFE6]' : 'border-[#001F3F]'}` : 'opacity-40 hover:opacity-100'}`}
+                                >
+                                    <span>My Collection</span>
+                                    <span className={`text-[8px] px-1.5 py-0.5 rounded-full ${darkMode ? 'bg-[#F5EFE6] text-[#121212]' : 'bg-[#001F3F] text-[#D1E2F2]'}`}>{activeTabFavCount}</span>
+                                </button>
+                            </div>
+
+                            {/* Main Filtering Input Field */}
                             <input 
                                 type="text"
-                                placeholder="Search index..."
+                                placeholder={`Search ${showOnlyFavs ? 'collection' : 'index'}...`}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className={`w-full bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/30 focus:border-[#F5EFE6]' : 'border-[#001F3F]/20 focus:border-[#001F3F]'} py-2 text-xs uppercase tracking-widest outline-none text-center transition-colors font-light placeholder:opacity-40`}
+                                className={`w-full max-w-xs bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/30 focus:border-[#F5EFE6]' : 'border-[#001F3F]/20 focus:border-[#001F3F]'} py-2 text-xs uppercase tracking-widest outline-none text-center transition-colors font-light placeholder:opacity-40`}
                             />
                         </div>
 
-                        {/* Grid Matrix */}
-                        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-layout ${theme.layoutGrid} p-0.5 pb-80`}>
-                            {filteredItems.map((item, i) => {
-                                const title = item.title || item.name || "Untitled";
-                                let sub = item.artist || item.category || "";
-                                if (!sub && activeTab === 'Articles') sub = 'Editorial';
-                                if (!sub && activeTab === 'New In Tech') sub = 'Technology';
-                                const img = item.image || "";
-                                const finalLink = item.spotify || item.link || item.url;
-                                const bodyText = item.review || item.description || item.summary || "";
-                                const album = item.album || "";
-                                const year = item.year || "";
-                                const location = item.location || "";
+                        {/* Minimalist Empty States Fallback Render Block */}
+                        {filteredItems.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-40 px-6 text-center animate-fade-in opacity-40">
+                                <p className="font-serif text-xl italic mb-2">No recommendations found.</p>
+                                <p className="text-[10px] uppercase tracking-widest font-light leading-relaxed">
+                                    {showOnlyFavs ? "Flip cards over and save entries to populate this personal deck." : "Try adjusting your search criteria."}
+                                </p>
+                            </div>
+                        ) : (
+                            /* Core Architectural Matrix Grid */
+                            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-layout ${theme.layoutGrid} p-0.5 pb-80`}>
+                                {filteredItems.map((item, i) => {
+                                    const title = item.title || item.name || "Untitled";
+                                    let sub = item.artist || item.category || "";
+                                    if (!sub && activeTab === 'Articles') sub = 'Editorial';
+                                    if (!sub && activeTab === 'New In Tech') sub = 'Technology';
+                                    const img = item.image || "";
+                                    const finalLink = item.spotify || item.link || item.url;
+                                    const bodyText = item.review || item.description || item.summary || "";
+                                    const album = item.album || "";
+                                    const year = item.year || "";
+                                    const location = item.location || "";
+                                    
+                                    const isSaved = favorites.includes(`${activeTab}-${title}`);
 
-                                return (
-                                    <div key={`${title}-${i}`} className={`group relative overflow-hidden h-[550px] ${theme.cardBg}`}>
-                                        <div className="absolute inset-0 z-10">
-                                            {img ? (
-                                                <img src={img} className="w-full h-full object-cover grayscale opacity-90 transition-transform duration-700 group-hover:scale-110" />
-                                            ) : (
-                                                <div className={`w-full h-full ${theme.placeholderBg} flex items-center justify-center text-[10px] uppercase tracking-widest opacity-20`}>No Image Provided</div>
-                                            )}
-                                        </div>
-                                        
-                                        {/* Card Cover Details */}
-                                        <div className={`absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t ${darkMode ? 'from-[#1C1C1E] via-[#1C1C1E]/80' : 'from-white via-white/80'} to-transparent z-20 group-hover:opacity-0 transition-opacity duration-300`}>
-                                            <h3 className={`font-serif text-2xl italic leading-tight ${darkMode ? 'text-[#F5EFE6]' : 'text-[#001F3F]'}`}>{title}</h3>
-                                            <p className={`text-[10px] uppercase tracking-[0.3em] font-bold opacity-50 ${darkMode ? 'text-[#F5EFE6]' : 'text-[#001F3F]'}`}>{sub}</p>
-                                        </div>
-                                        
-                                        {/* Card Back Details (Hover Context Overlay) */}
-                                        <div className={`absolute inset-0 ${darkMode ? 'bg-[#F5EFE6] text-[#121212]' : 'bg-[#001F3F] text-[#E6F0FA]'} opacity-0 group-hover:opacity-100 transition-all duration-500 z-40 flex flex-col p-10`}>
-                                            <h3 className="font-serif text-3xl italic mb-2">{title}</h3>
-                                            <p className={`text-[10px] uppercase tracking-widest font-bold opacity-50 mb-6 border-b ${darkMode ? 'border-[#121212]/20' : 'border-[#E6F0FA]/20'} pb-4`}>{sub}</p>
-                                            
-                                            <div className="mb-6 space-y-1 text-[9px] uppercase tracking-[0.2em] opacity-60 italic font-light">
-                                                {album && <p>Album: {album}</p>}
-                                                {year && <p>Released: {year}</p>}
-                                                {location && <p>Location: {location}</p>}
-                                            </div>
-                                            
-                                            <div className="flex-grow overflow-y-auto custom-scroll mb-8 pr-2">
-                                                <p className="text-xs font-light leading-relaxed italic opacity-90">{bodyText ? `"${bodyText}"` : "Editorial pending."}</p>
-                                            </div>
-                                            
-                                            {/* Action Control Deck */}
-                                            <div className="mt-auto flex flex-col space-y-2">
-                                                {finalLink && (
-                                                    <a href={finalLink} target="_blank" className={`border ${darkMode ? 'border-[#121212] hover:bg-[#121212] hover:text-[#F5EFE6]' : 'border-[#E6F0FA] hover:bg-[#E6F0FA] hover:text-[#001F3F]'} py-4 text-[9px] uppercase tracking-[0.4em] font-bold text-center transition-all`}>
-                                                        {activeTab === 'Songs' ? "Listen on Spotify" : activeTab === 'New In Tech' ? "Read Source" : "Website"}
-                                                    </a>
+                                    return (
+                                        <div key={`${title}-${i}`} className={`group relative overflow-hidden h-[550px] ${theme.cardBg}`}>
+                                            <div className="absolute inset-0 z-10">
+                                                {img ? (
+                                                    <img src={img} className="w-full h-full object-cover grayscale opacity-90 transition-transform duration-700 group-hover:scale-110" />
+                                                ) : (
+                                                    <div className={`w-full h-full ${theme.placeholderBg} flex items-center justify-center text-[10px] uppercase tracking-widest opacity-20`}>No Image Provided</div>
                                                 )}
+                                            </div>
+                                            
+                                            {/* Primary Face Card Details overlay sheet */}
+                                            <div className={`absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t ${darkMode ? 'from-[#1C1C1E] via-[#1C1C1E]/80' : 'from-white via-white/80'} to-transparent z-20 group-hover:opacity-0 transition-opacity duration-300`}>
+                                                <h3 className={`font-serif text-2xl italic leading-tight ${darkMode ? 'text-[#F5EFE6]' : 'text-[#001F3F]'}`}>{title}</h3>
+                                                <p className={`text-[10px] uppercase tracking-[0.3em] font-bold opacity-50 ${darkMode ? 'text-[#F5EFE6]' : 'text-[#001F3F]'}`}>{sub}</p>
+                                            </div>
+                                            
+                                            {/* Advanced Review Overlay Panel (Activates via Hover Actions) */}
+                                            <div className={`absolute inset-0 ${darkMode ? 'bg-[#F5EFE6] text-[#121212]' : 'bg-[#001F3F] text-[#E6F0FA]'} opacity-0 group-hover:opacity-100 transition-all duration-500 z-40 flex flex-col p-10`}>
+                                                <h3 className="font-serif text-3xl italic mb-2">{title}</h3>
+                                                <p className={`text-[10px] uppercase tracking-widest font-bold opacity-50 mb-6 border-b ${darkMode ? 'border-[#121212]/20' : 'border-[#E6F0FA]/20'} pb-4`}>{sub}</p>
                                                 
-                                                <button 
-                                                    onClick={(e) => handleShare(e, title)}
-                                                    className={`border ${darkMode ? 'border-[#121212]/40 hover:bg-[#121212] hover:text-[#F5EFE6]' : 'border-[#E6F0FA]/40 hover:bg-[#E6F0FA] hover:text-[#001F3F]'} py-2 text-[8px] uppercase tracking-[0.3em] font-bold text-center transition-all opacity-80 hover:opacity-100`}
-                                                >
-                                                    {copiedId === title ? "Link Copied!" : "Copy Share Link"}
-                                                </button>
+                                                <div className="mb-6 space-y-1 text-[9px] uppercase tracking-[0.2em] opacity-60 italic font-light">
+                                                    {album && <p>Album: {album}</p>}
+                                                    {year && <p>Released: {year}</p>}
+                                                    {location && <p>Location: {location}</p>}
+                                                </div>
+                                                
+                                                <div className="flex-grow overflow-y-auto custom-scroll mb-8 pr-2">
+                                                    <p className="text-xs font-light leading-relaxed italic opacity-90">{bodyText ? `"${bodyText}"` : "Editorial pending."}</p>
+                                                </div>
+                                                
+                                                {/* Action Panel Controls */}
+                                                <div className="mt-auto flex flex-col space-y-2">
+                                                    {finalLink && (
+                                                        <a href={finalLink} target="_blank" className={`border ${darkMode ? 'border-[#121212] hover:bg-[#121212] hover:text-[#F5EFE6]' : 'border-[#E6F0FA] hover:bg-[#E6F0FA] hover:text-[#001F3F]'} py-4 text-[9px] uppercase tracking-[0.4em] font-bold text-center transition-all`}>
+                                                            {activeTab === 'Songs' ? "Listen on Spotify" : activeTab === 'New In Tech' ? "Read Source" : "Website"}
+                                                        </a>
+                                                    )}
+                                                    
+                                                    <button 
+                                                        onClick={() => toggleFavorite(title)}
+                                                        className={`border ${darkMode ? 'border-[#121212]/30 hover:bg-[#121212] hover:text-[#F5EFE6]' : 'border-[#E6F0FA]/30 hover:bg-[#E6F0FA] hover:text-[#001F3F]'} py-2 text-[8px] uppercase tracking-[0.3em] font-bold text-center transition-all`}
+                                                    >
+                                                        {isSaved ? "✕ Remove from Collection" : "✓ Save to Collection"}
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
                 );
             };
 
             return (
                 <div className={`min-h-screen flex flex-col ${theme.bg} ${theme.text}`}>
-                    {/* Top Anchor Control Panel */}
+                    {/* Sticky Persistent Navigation Anchor Header */}
                     <nav className={`fixed top-0 w-full ${theme.navBg} backdrop-blur-md z-50 px-8 py-4 flex justify-between items-center border-b ${theme.border}`}>
                         <div className="flex items-center space-x-4">
                             <button onClick={() => setActiveTab('Home')} className="hover:opacity-70 transition-opacity">
                                 <img src="https://trishrai.github.io/thelastchord/Logo.jpeg" alt="TLC" className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover border border-[#001F3F]/20 shadow-sm" />
                             </button>
                             
-                            {/* Theme Interactive Toggle switch */}
+                            {/* Minimalism Editorial Palette Switcher Trigger */}
                             <button 
                                 onClick={() => setDarkMode(!darkMode)} 
                                 className={`text-[8px] uppercase tracking-[0.3em] px-3 py-1 border ${darkMode ? 'border-[#F5EFE6]/30 text-[#F5EFE6]/60 hover:text-[#F5EFE6]' : 'border-[#001F3F]/20 text-[#001F3F]/60 hover:text-[#001F3F]'} rounded transition-all`}
@@ -276,7 +317,7 @@
 
                     <main className="pt-24 flex-grow mx-auto w-full max-w-[1600px]">{renderContent()}</main>
 
-                    {/* Bottom Sticky Tab System */}
+                    {/* Ground Navigation Menu Dock Footer */}
                     <footer className={`fixed bottom-0 w-full ${theme.footerBg} backdrop-blur-md border-t ${theme.border} flex justify-around p-6 text-[9px] uppercase font-bold tracking-[0.2em] z-50 shadow-sm`}>
                         {['Home', 'Songs', 'London', 'Articles', 'New In Tech'].map(tab => (
                             <button key={tab} onClick={() => setActiveTab(tab)} className={activeTab === tab ? `scale-105 transition-transform border-b ${darkMode ? 'border-[#F5EFE6] text-[#F5EFE6]' : 'border-[#001F3F] text-[#001F3F]'}` : "opacity-30 hover:opacity-100 transition-all"}>
