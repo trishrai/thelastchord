@@ -36,7 +36,6 @@
         const { useState, useEffect, useMemo } = React;
 
         const App = () => {
-            // Load persistent tab states
             const [activeTab, setActiveTab] = useState(() => {
                 return localStorage.getItem('tlc_active_tab') || 'Home';
             });
@@ -45,7 +44,7 @@
                 return localStorage.getItem('tlc_dark_mode') === 'true';
             });
 
-            // Load global collection framework state from local cache
+            // Unified collection system holding composite structures
             const [favorites, setFavorites] = useState(() => {
                 const cachedData = localStorage.getItem('tlc_favorites');
                 return cachedData ? JSON.parse(cachedData) : [];
@@ -53,6 +52,9 @@
 
             const [searchQuery, setSearchQuery] = useState('');
             const [showOnlyFavs, setShowOnlyFavs] = useState(false);
+            const [selectedCategory, setSelectedCategory] = useState('Landing'); 
+            const [sortOrder, setSortOrder] = useState('newest'); 
+            const [hoveredCategory, setHoveredCategory] = useState(null); 
             const [data, setData] = useState({ Songs: [], London: [], Articles: [], Tech: [] });
 
             const CSV_LINKS = {
@@ -62,18 +64,47 @@
                 Tech: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1956240315&single=true&output=csv"
             };
 
-            // Save basic settings to cache
+            const CATEGORY_MAP = {
+                "The Last Chord": {
+                    title: "The Last Chord",
+                    pillBg: "bg-[#DDEBFA]", pillText: "text-[#1E40AF]",
+                    desc: "Welcome to the home of original, long-form editorial content. Unpacking music history, industry architecture, and creative breakthroughs directly from our desk."
+                },
+                "Off The Record: Opinion Pieces": {
+                    title: "Off The Record: Opinion Pieces",
+                    pillBg: "bg-[#E2F0D9]", pillText: "text-[#2E7D32]",
+                    desc: "Welcome to Off the Record, where art meets insight. We offer sharp, unfiltered opinion pieces on cultural shifts, the evolution of sound, and the timeless debates shaping the industry."
+                },
+                "The Sonic Lens: Analysis": {
+                    title: "The Sonic Lens: Analysis",
+                    pillBg: "bg-[#F3E5F5]", pillText: "text-[#6A1B9A]",
+                    desc: "Welcome to The Sonic Lens. We examine the intersection of art, culture, and society through a critical eye. From the evolution of musical traditions to the impact of iconic movements, we offer thought-provoking analysis on how art shapes our world."
+                },
+                "Studio Sessions: Interviews": {
+                    title: "Studio Sessions: Interviews",
+                    pillBg: "bg-[#E0F2F1]", pillText: "text-[#00695C]",
+                    desc: "Welcome to Studio Sessions, where creativity meets conversation. We interview musicians, writers, and visual creators to uncover the stories behind their art. Dive deep into the processes, struggles, and passions that drive the creative world."
+                },
+                "Soundcheck: Reviews": {
+                    title: "Soundcheck: Reviews",
+                    pillBg: "bg-[#FCE4EC]", pillText: "text-[#C2185B]",
+                    desc: "Welcome to Soundcheck, the reviews section of The Last Chord. We cover albums, films, art, and culture that leave a mark. Beyond simple critiques, we unpack the storytelling, rebellion, and raw emotion behind every piece."
+                }
+            };
+
             useEffect(() => {
                 localStorage.setItem('tlc_active_tab', activeTab);
                 setSearchQuery(''); 
-                setShowOnlyFavs(false); // Default to full tab contents when switching channels
+                // Skip bypassing collection mode on active route updates to keep view persistent
+                if (activeTab === 'Articles') {
+                    setSelectedCategory('Landing'); 
+                }
             }, [activeTab]);
 
             useEffect(() => {
                 localStorage.setItem('tlc_dark_mode', darkMode);
             }, [darkMode]);
 
-            // Save favorites array structural updates to cache
             useEffect(() => {
                 localStorage.setItem('tlc_favorites', JSON.stringify(favorites));
             }, [favorites]);
@@ -94,7 +125,6 @@
                 });
             }, []);
 
-            // Dynamic layout styles matrix
             const theme = {
                 bg: darkMode ? 'bg-[#121212]' : 'bg-[#D1E2F2]',
                 navBg: darkMode ? 'bg-[#121212]/90' : 'bg-[#D1E2F2]/90',
@@ -118,9 +148,9 @@
                 }
             };
 
-            // Toggle favorite storage mechanism
-            const toggleFavorite = (itemTitle) => {
-                const compositeKey = `${activeTab}-${itemTitle}`;
+            // Saves with origin markers so things filter accurately across layouts
+            const toggleFavorite = (itemTitle, originTab) => {
+                const compositeKey = `${originTab}-${itemTitle}`;
                 if (favorites.includes(compositeKey)) {
                     setFavorites(prev => prev.filter(k => k !== compositeKey));
                 } else {
@@ -128,17 +158,23 @@
                 }
             };
 
-            // Compute active favorites subset total count matching current tab
-            const activeTabFavCount = useMemo(() => {
-                return favorites.filter(k => k.startsWith(`${activeTab}-`)).length;
-            }, [favorites, activeTab]);
+            // Global Master Count of all things bookmarked anywhere
+            const globalFavCount = useMemo(() => favorites.length, [favorites]);
 
-            // Deep combined filtering pipeline (Search + Collection filters)
             const filteredItems = useMemo(() => {
                 const currentTabKey = activeTab === 'New In Tech' ? 'Tech' : activeTab;
                 let items = data[currentTabKey] || [];
 
-                // Filter down if 'My Collection' mode is turned on
+                if (activeTab === 'Articles') {
+                    if (selectedCategory !== 'Landing' && selectedCategory !== 'All') {
+                        items = items.filter(item => (item.summary || "").trim() === selectedCategory);
+                    }
+                    if (selectedCategory === 'All' && sortOrder === 'oldest') {
+                        items = items.slice().reverse();
+                    }
+                }
+
+                // If collection view is active, parse target subsets matching current channel parameters
                 if (showOnlyFavs) {
                     items = items.filter(item => {
                         const title = item.title || item.name || "Untitled";
@@ -151,11 +187,11 @@
                 const query = searchQuery.toLowerCase().trim();
                 return items.filter(item => {
                     const title = (item.title || item.name || "").toLowerCase();
-                    const sub = (item.artist || item.category || "").toLowerCase();
-                    const bodyText = (item.review || item.description || item.summary || "").toLowerCase();
+                    const sub = (item.artist || item.summary || item.category || "").toLowerCase();
+                    const bodyText = (item.description || item.review || "").toLowerCase();
                     return title.includes(query) || sub.includes(query) || bodyText.includes(query);
                 });
-            }, [data, activeTab, searchQuery, showOnlyFavs, favorites]);
+            }, [data, activeTab, searchQuery, showOnlyFavs, favorites, selectedCategory, sortOrder]);
 
             const renderContent = () => {
                 if (activeTab === 'Home') return (
@@ -173,57 +209,126 @@
                     </div>
                 );
 
+                // Show editorial registry menu if on Articles tab and landing position is true (unless viewing favorites)
+                if (activeTab === 'Articles' && selectedCategory === 'Landing' && !showOnlyFavs) {
+                    return (
+                        <div className="w-full px-4 md:px-8 max-w-4xl mx-auto py-12 animate-fade-in flex flex-col items-center">
+                            
+                            {/* Keep quick view filters on top of registry for faster hopping */}
+                            <div className="flex items-center space-x-6 text-[10px] uppercase tracking-[0.2em] font-bold mb-8">
+                                <span className={`pb-1 border-b ${darkMode ? 'border-[#F5EFE6]' : 'border-[#001F3F]'}`}>Index Deck</span>
+                                <button 
+                                    onClick={() => { setShowOnlyFavs(true); setSelectedCategory('All'); }}
+                                    className="pb-1 transition-all flex items-center space-x-1.5 opacity-40 hover:opacity-100"
+                                >
+                                    <span>My Global Collection</span>
+                                    <span className={`text-[8px] px-1.5 py-0.5 rounded-full ${darkMode ? 'bg-[#F5EFE6] text-[#121212]' : 'bg-[#001F3F] text-[#D1E2F2]'}`}>{globalFavCount}</span>
+                                </button>
+                            </div>
+
+                            <div className="text-center mb-12">
+                                <h2 className="font-serif text-4xl italic tracking-tight mb-2">Editorial Registry</h2>
+                                <p className="text-[10px] uppercase tracking-[0.3em] opacity-50">Select an archive sector to browse recommendations</p>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mb-4">
+                                {Object.keys(CATEGORY_MAP).map((key) => {
+                                    const cat = CATEGORY_MAP[key];
+                                    const isHovered = hoveredCategory === key;
+                                    return (
+                                        <div 
+                                            key={key}
+                                            onClick={() => setSelectedCategory(key)}
+                                            onMouseEnter={() => setHoveredCategory(key)}
+                                            onMouseLeave={() => setHoveredCategory(null)}
+                                            className={`border ${darkMode ? 'border-[#F5EFE6]/20 hover:bg-[#F5EFE6] hover:text-[#121212]' : 'border-[#001F3F]/20 hover:bg-[#001F3F] hover:text-[#E6F0FA]'} p-8 h-48 flex flex-col justify-center items-center text-center cursor-pointer transition-all duration-300 relative group`}
+                                        >
+                                            {isHovered ? (
+                                                <p className="text-xs italic leading-relaxed px-2 font-light tracking-wide animate-fade-in">{cat.desc}</p>
+                                            ) : (
+                                                <div className="flex flex-col items-center space-y-3">
+                                                    <span className={`text-[9px] font-bold uppercase tracking-[0.2em] px-3 py-1 rounded-full ${cat.pillBg} ${cat.pillText}`}>
+                                                        {cat.title.split(':')[0]}
+                                                    </span>
+                                                    <h3 className="font-serif text-xl italic tracking-tight">{cat.title.includes(':') ? cat.title.split(':')[1].trim() : cat.title}</h3>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <button 
+                                onClick={() => setSelectedCategory('All')}
+                                className={`w-full border ${darkMode ? 'border-[#F5EFE6]/20 hover:bg-[#F5EFE6] hover:text-[#121212]' : 'border-[#001F3F]/20 hover:bg-[#001F3F] hover:text-[#E6F0FA]'} py-6 text-xs uppercase tracking-[0.4em] font-bold transition-all duration-300 text-center`}
+                            >
+                                Browse All Articles
+                            </button>
+                        </div>
+                    );
+                }
+
                 return (
                     <div className="flex flex-col w-full">
-                        {/* Interactive Control Dashboard Deck */}
                         <div className="w-full px-4 md:px-8 max-w-xl mx-auto mb-8 mt-2 flex flex-col items-center space-y-4 animate-fade-in">
                             
-                            {/* Standard Sub-Navigation Collection Toggles */}
+                            {/* Persistent global master tracker menu row */}
                             <div className="flex items-center space-x-6 text-[10px] uppercase tracking-[0.2em] font-bold">
+                                {activeTab === 'Articles' && (
+                                    <button 
+                                        onClick={() => { setSelectedCategory('Landing'); setShowOnlyFavs(false); }}
+                                        className="opacity-50 hover:opacity-100 transition-opacity flex items-center space-x-1"
+                                    >
+                                        <span>← Index</span>
+                                    </button>
+                                )}
                                 <button 
                                     onClick={() => setShowOnlyFavs(false)}
                                     className={`pb-1 transition-all ${!showOnlyFavs ? `border-b ${darkMode ? 'border-[#F5EFE6]' : 'border-[#001F3F]'}` : 'opacity-40 hover:opacity-100'}`}
                                 >
-                                    All Items
+                                    {showOnlyFavs ? 'Show All Channel Items' : selectedCategory === 'All' ? 'All Pieces' : selectedCategory !== 'Landing' && activeTab === 'Articles' ? selectedCategory.split(':')[0] : 'All Items'}
                                 </button>
                                 <button 
                                     onClick={() => setShowOnlyFavs(true)}
                                     className={`pb-1 transition-all flex items-center space-x-1.5 ${showOnlyFavs ? `border-b ${darkMode ? 'border-[#F5EFE6]' : 'border-[#001F3F]'}` : 'opacity-40 hover:opacity-100'}`}
                                 >
-                                    <span>My Collection</span>
-                                    <span className={`text-[8px] px-1.5 py-0.5 rounded-full ${darkMode ? 'bg-[#F5EFE6] text-[#121212]' : 'bg-[#001F3F] text-[#D1E2F2]'}`}>{activeTabFavCount}</span>
+                                    <span>My Global Collection</span>
+                                    <span className={`text-[8px] px-1.5 py-0.5 rounded-full ${darkMode ? 'bg-[#F5EFE6] text-[#121212]' : 'bg-[#001F3F] text-[#D1E2F2]'}`}>{globalFavCount}</span>
                                 </button>
                             </div>
 
-                            {/* Main Filtering Input Field */}
+                            {activeTab === 'Articles' && selectedCategory === 'All' && !showOnlyFavs && (
+                                <div className="flex items-center space-x-4 text-[9px] uppercase tracking-[0.15em] opacity-60">
+                                    <button onClick={() => setSortOrder('newest')} className={`transition-all ${sortOrder === 'newest' ? 'font-bold underline opacity-100' : 'hover:opacity-100'}`}>Newest First</button>
+                                    <span>|</span>
+                                    <button onClick={() => setSortOrder('oldest')} className={`transition-all ${sortOrder === 'oldest' ? 'font-bold underline opacity-100' : 'hover:opacity-100'}`}>Oldest First</button>
+                                </div>
+                            )}
+
                             <input 
                                 type="text"
-                                placeholder={`Search ${showOnlyFavs ? 'collection' : 'index'}...`}
+                                placeholder={showOnlyFavs ? `Search saved ${activeTab.toLowerCase()}...` : `Search dynamic layout...`}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className={`w-full max-w-xs bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/30 focus:border-[#F5EFE6]' : 'border-[#001F3F]/20 focus:border-[#001F3F]'} py-2 text-xs uppercase tracking-widest outline-none text-center transition-colors font-light placeholder:opacity-40`}
                             />
                         </div>
 
-                        {/* Minimalist Empty States Fallback Render Block */}
                         {filteredItems.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-40 px-6 text-center animate-fade-in opacity-40">
-                                <p className="font-serif text-xl italic mb-2">Refreshing.</p>
+                                <p className="font-serif text-xl italic mb-2">No elements found.</p>
                                 <p className="text-[10px] uppercase tracking-widest font-light leading-relaxed">
-                                    {showOnlyFavs ? "Flip cards over and save entries to populate this personal deck." : "One moment please."}
+                                    {showOnlyFavs ? `You haven't saved any entries under "${activeTab}" yet.` : "Adjust your search parameters."}
                                 </p>
                             </div>
                         ) : (
-                            /* Core Architectural Matrix Grid */
                             <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-layout ${theme.layoutGrid} p-0.5 pb-80`}>
                                 {filteredItems.map((item, i) => {
                                     const title = item.title || item.name || "Untitled";
-                                    let sub = item.artist || item.category || "";
-                                    if (!sub && activeTab === 'Articles') sub = 'Editorial';
-                                    if (!sub && activeTab === 'New In Tech') sub = 'Technology';
+                                    let sub = item.summary || item.artist || item.category || "";
                                     const img = item.image || "";
-                                    const finalLink = item.spotify || item.link || item.url;
-                                    const bodyText = item.review || item.description || item.summary || "";
+                                    const finalLink = item.link || item.spotify || item.url;
+                                    const bodyText = item.description || item.review || "";
                                     const album = item.album || "";
                                     const year = item.year || "";
                                     const location = item.location || "";
@@ -240,13 +345,11 @@
                                                 )}
                                             </div>
                                             
-                                            {/* Primary Face Card Details overlay sheet */}
                                             <div className={`absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t ${darkMode ? 'from-[#1C1C1E] via-[#1C1C1E]/80' : 'from-white via-white/80'} to-transparent z-20 group-hover:opacity-0 transition-opacity duration-300`}>
                                                 <h3 className={`font-serif text-2xl italic leading-tight ${darkMode ? 'text-[#F5EFE6]' : 'text-[#001F3F]'}`}>{title}</h3>
                                                 <p className={`text-[10px] uppercase tracking-[0.3em] font-bold opacity-50 ${darkMode ? 'text-[#F5EFE6]' : 'text-[#001F3F]'}`}>{sub}</p>
                                             </div>
                                             
-                                            {/* Advanced Review Overlay Panel (Activates via Hover Actions) */}
                                             <div className={`absolute inset-0 ${darkMode ? 'bg-[#F5EFE6] text-[#121212]' : 'bg-[#001F3F] text-[#E6F0FA]'} opacity-0 group-hover:opacity-100 transition-all duration-500 z-40 flex flex-col p-10`}>
                                                 <h3 className="font-serif text-3xl italic mb-2">{title}</h3>
                                                 <p className={`text-[10px] uppercase tracking-widest font-bold opacity-50 mb-6 border-b ${darkMode ? 'border-[#121212]/20' : 'border-[#E6F0FA]/20'} pb-4`}>{sub}</p>
@@ -258,19 +361,19 @@
                                                 </div>
                                                 
                                                 <div className="flex-grow overflow-y-auto custom-scroll mb-8 pr-2">
-                                                    
+                                                    <p className="text-xs font-light leading-relaxed italic opacity-90">{bodyText ? `"${bodyText}"` : "Editorial pending."}</p>
                                                 </div>
                                                 
-                                                {/* Action Panel Controls */}
                                                 <div className="mt-auto flex flex-col space-y-2">
                                                     {finalLink && (
                                                         <a href={finalLink} target="_blank" className={`border ${darkMode ? 'border-[#121212] hover:bg-[#121212] hover:text-[#F5EFE6]' : 'border-[#E6F0FA] hover:bg-[#E6F0FA] hover:text-[#001F3F]'} py-4 text-[9px] uppercase tracking-[0.4em] font-bold text-center transition-all`}>
-                                                            {activeTab === 'Songs' ? "Listen on Spotify" : activeTab === 'New In Tech' ? "Read Source" : "Website"}
+                                                            {activeTab === 'Songs' ? "Listen on Spotify" : activeTab === 'Articles' ? "Read Publication" : "Website"}
                                                         </a>
                                                     )}
                                                     
+                                                    {/* Save triggers explicitly lock into the respective active tab context */}
                                                     <button 
-                                                        onClick={() => toggleFavorite(title)}
+                                                        onClick={() => toggleFavorite(title, activeTab)}
                                                         className={`border ${darkMode ? 'border-[#121212]/30 hover:bg-[#121212] hover:text-[#F5EFE6]' : 'border-[#E6F0FA]/30 hover:bg-[#E6F0FA] hover:text-[#001F3F]'} py-2 text-[8px] uppercase tracking-[0.3em] font-bold text-center transition-all`}
                                                     >
                                                         {isSaved ? "✕ Remove from Collection" : "✓ Save to Collection"}
@@ -288,14 +391,12 @@
 
             return (
                 <div className={`min-h-screen flex flex-col ${theme.bg} ${theme.text}`}>
-                    {/* Sticky Persistent Navigation Anchor Header */}
                     <nav className={`fixed top-0 w-full ${theme.navBg} backdrop-blur-md z-50 px-8 py-4 flex justify-between items-center border-b ${theme.border}`}>
                         <div className="flex items-center space-x-4">
-                            <button onClick={() => setActiveTab('Home')} className="hover:opacity-70 transition-opacity">
+                            <button onClick={() => { setActiveTab('Home'); setShowOnlyFavs(false); }} className="hover:opacity-70 transition-opacity">
                                 <img src="https://trishrai.github.io/thelastchord/Logo.jpeg" alt="TLC" className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover border border-[#001F3F]/20 shadow-sm" />
                             </button>
                             
-                            {/* Minimalism Editorial Palette Switcher Trigger */}
                             <button 
                                 onClick={() => setDarkMode(!darkMode)} 
                                 className={`text-[8px] uppercase tracking-[0.3em] px-3 py-1 border ${darkMode ? 'border-[#F5EFE6]/30 text-[#F5EFE6]/60 hover:text-[#F5EFE6]' : 'border-[#001F3F]/20 text-[#001F3F]/60 hover:text-[#001F3F]'} rounded transition-all`}
@@ -317,7 +418,6 @@
 
                     <main className="pt-24 flex-grow mx-auto w-full max-w-[1600px]">{renderContent()}</main>
 
-                    {/* Ground Navigation Menu Dock Footer */}
                     <footer className={`fixed bottom-0 w-full ${theme.footerBg} backdrop-blur-md border-t ${theme.border} flex justify-around p-6 text-[9px] uppercase font-bold tracking-[0.2em] z-50 shadow-sm`}>
                         {['Home', 'Songs', 'London', 'Articles', 'New In Tech'].map(tab => (
                             <button key={tab} onClick={() => setActiveTab(tab)} className={activeTab === tab ? `scale-105 transition-transform border-b ${darkMode ? 'border-[#F5EFE6] text-[#F5EFE6]' : 'border-[#001F3F] text-[#001F3F]'}` : "opacity-30 hover:opacity-100 transition-all"}>
