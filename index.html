@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Last Chord</title>
+    <title>The Last Chord — Culture, Tech, Sound</title>
     
     <link rel="apple-touch-icon" href="https://trishrai.github.io/thelastchord/Logo.jpeg">
     <link rel="icon" type="image/jpeg" href="https://trishrai.github.io/thelastchord/Logo.jpeg">
@@ -18,7 +18,7 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:italic,bold&family=Inter:wght=300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&display=swap" rel="stylesheet">
     
     <style>
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; transition: background-color 0.4s ease, color 0.4s ease; }
@@ -27,7 +27,10 @@
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0, 31, 63, 0.2); border-radius: 10px; }
         .grid-layout { gap: 1px !important; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeInUp 1.2s ease-out forwards; }
+        .animate-fade-in { animation: fadeInUp 0.8s ease-out forwards; }
+        .glass-card { backdrop-filter: blur(2px); }
+        .founder-card p { font-size: 0.85rem; line-height: 1.5rem; font-weight: 300; }
+        @media (max-width: 640px) { .founder-card p { font-size: 0.75rem; } }
     </style>
 </head>
 <body>
@@ -56,19 +59,22 @@
             const [sortOrder, setSortOrder] = useState('newest'); 
             const [hoveredCategory, setHoveredCategory] = useState(null); 
             const [data, setData] = useState({ Songs: [], London: [], Articles: [], Tech: [] });
+            
+            // Home UI toggles
+            const [showFounder, setShowFounder] = useState(false);
 
-            // Expanded registration states
+            // Registration state (updated order + city dropdown)
             const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', city: '' });
             const [signupStatus, setSignupStatus] = useState('idle'); // idle, loading, success, error
 
-            // PASTE YOUR GOOGLE WEB APP URL FROM STEP 2 RIGHT HERE:
-            const NEWSLETTER_SCRIPT_URL = "YOUR_GOOGLE_WEB_APP_URL_HERE";
+            // GOOGLE WEB APP URL (same endpoint, payload order restructured)
+            const NEWSLETTER_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzCiB2pnQi3LhpahORpDfv6qPnf5hTtHHIZ7-JtvVcAu8a9YKhTTrrTJg3GJjVjvaoPrA/exec";
 
             const CSV_LINKS = {
-                Songs: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=0&single=true&output=csv",
-                London: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1791301794&single=true&output=csv",
-                Articles: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=116420010&single=true&output=csv",
-                Tech: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1956240315&single=true&output=csv"
+                Songs: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=0&single=true&output=csv",
+                London: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1791301794&single=true&output=csv",
+                Articles: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=116420010&single=true&output=csv",
+                Tech: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1956240315&single=true&output=csv"
             };
 
             const CATEGORY_MAP = {
@@ -97,6 +103,20 @@
                     pillBg: "bg-[#FCE4EC]", pillText: "text-[#C2185B]",
                     desc: "Welcome to Soundcheck, the reviews section of The Last Chord. We cover albums, films, art, and culture that leave a mark. Beyond simple critiques, we unpack the storytelling, rebellion, and raw emotion behind every piece."
                 }
+            };
+
+            // Theme helper
+            const theme = {
+                bg: darkMode ? 'bg-[#121212]' : 'bg-[#D1E2F2]',
+                navBg: darkMode ? 'bg-[#121212]/90' : 'bg-[#D1E2F2]/90',
+                footerBg: darkMode ? 'bg-[#121212]/95' : 'bg-[#D1E2F2]/95',
+                text: darkMode ? 'text-[#F5EFE6]' : 'text-[#001F3F]',
+                border: darkMode ? 'border-[#F5EFE6]/10' : 'border-[#001F3F]/10',
+                pillBorder: darkMode ? 'border-[#F5EFE6]' : 'border-[#001F3F]',
+                cardBg: darkMode ? 'bg-[#1C1C1E]' : 'bg-white',
+                layoutGrid: darkMode ? 'bg-[#F5EFE6]/10' : 'bg-[#001F3F]/10',
+                placeholderBg: darkMode ? 'bg-[#F5EFE6]/5' : 'bg-[#001F3F]/5',
+                formCard: darkMode ? 'bg-[#1E1E22]/90 border-white/10' : 'bg-white/90 border-[#001F3F]/10'
             };
 
             useEffect(() => {
@@ -130,18 +150,6 @@
                     });
                 });
             }, []);
-
-            const theme = {
-                bg: darkMode ? 'bg-[#121212]' : 'bg-[#D1E2F2]',
-                navBg: darkMode ? 'bg-[#121212]/90' : 'bg-[#D1E2F2]/90',
-                footerBg: darkMode ? 'bg-[#121212]/95' : 'bg-[#D1E2F2]/95',
-                text: darkMode ? 'text-[#F5EFE6]' : 'text-[#001F3F]',
-                border: darkMode ? 'border-[#F5EFE6]/10' : 'border-[#001F3F]/10',
-                pillBorder: darkMode ? 'border-[#F5EFE6]' : 'border-[#001F3F]',
-                cardBg: darkMode ? 'bg-[#1C1C1E]' : 'bg-white',
-                layoutGrid: darkMode ? 'bg-[#F5EFE6]/10' : 'bg-[#001F3F]/10',
-                placeholderBg: darkMode ? 'bg-[#F5EFE6]/5' : 'bg-[#001F3F]/5'
-            };
 
             const getPageHeader = (tab) => {
                 if (viewingCollection) return "YOUR MASTER COLLECTION DECK";
@@ -178,24 +186,37 @@
                 setFormData(prev => ({ ...prev, [name]: value }));
             };
 
+            // NEW: submit with field order: Timestamp, FirstName, LastName, City, Email
             const handleSubscribe = async (e) => {
                 e.preventDefault();
                 if (!formData.email.trim()) return;
 
                 setSignupStatus('loading');
+                // build payload with desired column order (Timestamp, FirstName, LastName, City, Email)
+                const payload = {
+                    Timestamp: new Date().toISOString(),
+                    FirstName: formData.firstName.trim(),
+                    LastName: formData.lastName.trim(),
+                    City: formData.city.trim(),
+                    Email: formData.email.trim()
+                };
+                
                 try {
                     await fetch(NEWSLETTER_SCRIPT_URL, {
                         method: 'POST',
                         mode: 'no-cors',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(formData)
+                        body: JSON.stringify(payload)
                     });
                     
                     setSignupStatus('success');
                     setFormData({ firstName: '', lastName: '', email: '', city: '' });
+                    // auto-reset success message after 4 seconds
+                    setTimeout(() => setSignupStatus('idle'), 4000);
                 } catch (error) {
                     setSignupStatus('error');
                     console.error("Signup failed:", error);
+                    setTimeout(() => setSignupStatus('idle'), 3000);
                 }
             };
 
@@ -308,6 +329,171 @@
                 );
             };
 
+            // ---------- HOMEPAGE (Redesigned Layout) ----------
+            const renderHome = () => (
+                <div className="max-w-7xl mx-auto px-6 md:px-8 py-6 animate-fade-in">
+                    {/* Hero */}
+                    <div className="text-center mb-12">
+                        <h1 className="text-6xl md:text-8xl font-serif italic tracking-tighter leading-none">The Last Chord</h1>
+                        <p className="text-[10px] uppercase tracking-[0.6em] font-bold opacity-40 mt-5 leading-loose">BY TRISHA RAI | EST. 2025</p>
+                    </div>
+
+                    {/* Main grid: about + signup side by side */}
+                    <div className="grid lg:grid-cols-2 gap-10 items-start">
+                        {/* LEFT COLUMN: About / Founder */}
+                        <div className="space-y-6">
+                            <div className={`p-6 border-l-4 ${darkMode ? 'border-[#F5EFE6]/60 bg-[#1C1C1E]/40' : 'border-[#001F3F]/60 bg-white/50'} backdrop-blur-sm rounded-r-2xl`}>
+                                <h2 className="font-serif text-2xl italic mb-3 tracking-tight">About The Last Chord</h2>
+                                <p className="text-sm md:text-base leading-relaxed opacity-90 font-light">
+                                    Launched in February 2025 by founder Trisha Rai, <span className="font-semibold">The Last Chord</span> is a digital platform where technology and culture collide. 
+                                    From deep dives into London’s eclectic music and arts scene to sharp analysis of AI ethics, digital identity, and algorithmic culture — 
+                                    we offer intellectual debates, nuanced storytelling, and a holistic view of the forces reshaping our world.
+                                </p>
+                                <p className="text-sm md:text-base leading-relaxed opacity-80 mt-3 font-light">
+                                    Expect long-form essays, interviews, and criticism that refuse to look away. The Last Chord is for the curious, the sceptics, and the dreamers.
+                                </p>
+                            </div>
+
+                            {/* Founder toggle button */}
+                            <button 
+                                onClick={() => setShowFounder(!showFounder)}
+                                className={`group flex items-center space-x-2 text-[10px] uppercase tracking-[0.3em] font-bold border-b ${darkMode ? 'border-[#F5EFE6]/40 hover:border-[#F5EFE6]' : 'border-[#001F3F]/40 hover:border-[#001F3F]'} pb-1 transition-all`}
+                            >
+                                <span>{showFounder ? "− CLOSE FOUNDER ARCHIVE" : "⊕ ABOUT THE FOUNDER"}</span>
+                            </button>
+
+                            {/* Founder bio reveal */}
+                            {showFounder && (
+                                <div className={`founder-card p-5 rounded-xl ${darkMode ? 'bg-[#1E1E2A] border border-white/10' : 'bg-white/70 border border-[#001F3F]/10'} shadow-md animate-fade-in`}>
+                                    <div className="flex flex-col space-y-3 text-sm leading-relaxed">
+                                        <p><span className="font-serif italic text-lg">Trisha Rai</span> — founder, editor, and sole architect of The Last Chord. Born in India, raised in Hong Kong, and now based in London, Rai moved to the UK in 2020 to study at the London School of Economics. It was there she became fascinated by how technology silently rewires culture, identity, and collective memory.</p>
+                                        <p>Driven by the need for human‑centric tech critique, she launched The Last Chord in 2025. Every interview, policy analysis, and cultural review is researched, written, edited, and published by Rai — ensuring a singular, uncompromising voice.</p>
+                                        <p>Currently, Trisha is pursuing an MA in Digital Humanities at University College London (UCL), focusing on AI governance and digital aesthetics. She runs The Last Chord full‑time, bridging academic rigour with cultural journalism.</p>
+                                        <div className="pt-2 border-t border-dashed opacity-30 text-[9px] uppercase tracking-wider font-mono">
+                                            ⚡ This entire web app — from interface to logic — has been personally coded, built, and developed by Trisha Rai.
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* legacy substack + collection button inline (optional but keep visible) */}
+                            <div className="flex flex-wrap gap-4 pt-4">
+                                <a href="https://thelastchord.substack.com" target="_blank" className={`text-[9px] uppercase tracking-[0.4em] font-bold border ${darkMode ? 'border-[#F5EFE6]/40 hover:border-[#F5EFE6]' : 'border-[#001F3F]/30 hover:border-[#001F3F]'} px-5 py-2.5 transition-all hover:scale-[0.98]`}>
+                                    READ ON SUBSTACK →
+                                </a>
+                                <button 
+                                    onClick={() => { setViewingCollection(true); setCollectionSubFilter('All'); }}
+                                    className={`text-[9px] uppercase tracking-[0.3em] font-bold flex items-center space-x-2 px-4 py-2.5 rounded-full ${darkMode ? 'bg-[#F5EFE6]/10 hover:bg-[#F5EFE6]/20' : 'bg-[#001F3F]/5 hover:bg-[#001F3F]/10'} transition-all`}
+                                >
+                                    <span>📖 MY COLLECTION</span>
+                                    <span className={`text-[8px] px-2 py-0.5 rounded-full ${darkMode ? 'bg-[#F5EFE6] text-[#121212]' : 'bg-[#001F3F] text-[#D1E2F2]'}`}>{favorites.length}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* RIGHT COLUMN: SIGNUP FORM (enhanced contrast, dropdown city, reordered) */}
+                        <div className={`p-6 rounded-2xl shadow-sm border ${theme.formCard} transition-all`}>
+                            <h3 className="font-serif text-2xl italic tracking-tight mb-2 text-center">The Registry</h3>
+                            <p className="text-[8px] uppercase tracking-[0.3em] opacity-60 text-center mb-5">Join the inner circle — no spam, only signal</p>
+                            
+                            <form onSubmit={handleSubscribe} className="flex flex-col space-y-5">
+                                {signupStatus !== 'success' ? (
+                                    <>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="relative">
+                                                <input 
+                                                    type="text"
+                                                    name="firstName"
+                                                    placeholder="FIRST NAME"
+                                                    disabled={signupStatus === 'loading'}
+                                                    value={formData.firstName}
+                                                    onChange={handleFormChange}
+                                                    className={`w-full bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/40 focus:border-[#F5EFE6]' : 'border-[#001F3F]/30 focus:border-[#001F3F]'} py-2 text-xs uppercase tracking-wider outline-none transition-all placeholder:opacity-50`}
+                                                    required
+                                                />
+                                            </div>
+                                            <div>
+                                                <input 
+                                                    type="text"
+                                                    name="lastName"
+                                                    placeholder="LAST NAME"
+                                                    disabled={signupStatus === 'loading'}
+                                                    value={formData.lastName}
+                                                    onChange={handleFormChange}
+                                                    className={`w-full bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/40 focus:border-[#F5EFE6]' : 'border-[#001F3F]/30 focus:border-[#001F3F]'} py-2 text-xs uppercase tracking-wider outline-none transition-all placeholder:opacity-50`}
+                                                />
+                                            </div>
+                                        </div>
+                                        
+                                        {/* City field with datalist dropdown */}
+                                        <div>
+                                            <input 
+                                                list="cityOptions"
+                                                name="city"
+                                                placeholder="CITY (SELECT OR TYPE)"
+                                                disabled={signupStatus === 'loading'}
+                                                value={formData.city}
+                                                onChange={handleFormChange}
+                                                className={`w-full bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/40 focus:border-[#F5EFE6]' : 'border-[#001F3F]/30 focus:border-[#001F3F]'} py-2 text-xs uppercase tracking-wider outline-none transition-all placeholder:opacity-50`}
+                                            />
+                                            <datalist id="cityOptions">
+                                                <option value="London" />
+                                                <option value="Manchester" />
+                                                <option value="New York" />
+                                                <option value="Los Angeles" />
+                                                <option value="Tokyo" />
+                                                <option value="Hong Kong" />
+                                                <option value="Singapore" />
+                                                <option value="Mumbai" />
+                                                <option value="Delhi" />
+                                                <option value="Berlin" />
+                                                <option value="Paris" />
+                                                <option value="Toronto" />
+                                                <option value="Sydney" />
+                                                <option value="Dubai" />
+                                                <option value="San Francisco" />
+                                                <option value="Austin" />
+                                                <option value="Chicago" />
+                                                <option value="Other (specify)" />
+                                            </datalist>
+                                        </div>
+
+                                        <div>
+                                            <input 
+                                                type="email"
+                                                name="email"
+                                                required
+                                                placeholder="EMAIL ADDRESS"
+                                                disabled={signupStatus === 'loading'}
+                                                value={formData.email}
+                                                onChange={handleFormChange}
+                                                className={`w-full bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/40 focus:border-[#F5EFE6]' : 'border-[#001F3F]/30 focus:border-[#001F3F]'} py-2 text-xs uppercase tracking-wider outline-none transition-all placeholder:opacity-50`}
+                                            />
+                                        </div>
+
+                                        <button 
+                                            type="submit" 
+                                            disabled={signupStatus === 'loading'}
+                                            className={`mt-2 text-[9px] uppercase tracking-[0.4em] font-bold py-3 border ${darkMode ? 'border-[#F5EFE6] hover:bg-[#F5EFE6] hover:text-[#121212]' : 'border-[#001F3F] hover:bg-[#001F3F] hover:text-white'} transition-all disabled:opacity-30`}
+                                        >
+                                            {signupStatus === 'loading' ? 'SYNCING...' : 'SUBSCRIBE →'}
+                                        </button>
+                                    </>
+                                ) : (
+                                    <div className="py-6 text-center space-y-2">
+                                        <p className="text-[10px] uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-400 font-bold">✓ SUBSCRIBED</p>
+                                        <p className="text-[8px] uppercase tracking-[0.2em] opacity-60">You're on the list. Welcome to The Last Chord.</p>
+                                    </div>
+                                )}
+                                
+                                {signupStatus === 'loading' && <p className="text-[8px] uppercase tracking-[0.3em] opacity-40 animate-pulse text-center">Connecting to vault...</p>}
+                                {signupStatus === 'error' && <p className="text-[8px] uppercase tracking-[0.3em] text-rose-500 dark:text-rose-400 font-bold text-center">X transmission failed. Please try again.</p>}
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            );
+
             const renderContent = () => {
                 if (viewingCollection) {
                     return (
@@ -356,106 +542,16 @@
                     );
                 }
 
-                if (activeTab === 'Home') return (
-                    <div className="flex flex-col items-center justify-center p-6 min-h-[80vh] text-center">
-                        <div className="mb-6 animate-fade-in">
-                             <h1 className="text-6xl md:text-8xl font-serif italic tracking-tighter leading-none">The Last Chord</h1>
-                             <p className="text-[10px] uppercase tracking-[0.6em] font-bold opacity-40 mt-5 leading-loose">BY TRISHA RAI | EST. 2025</p>
-                        </div>
-                        
-                        {/* Upgraded Multi-field Registration Form */}
-                        <div className="w-full max-w-md mx-auto mb-10 p-6 animate-fade-in">
-                            <form onSubmit={handleSubscribe} className="flex flex-col space-y-4">
-                                {signupStatus !== 'success' ? (
-                                    <>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <input 
-                                                type="text"
-                                                name="firstName"
-                                                placeholder="FIRST NAME"
-                                                disabled={signupStatus === 'loading'}
-                                                value={formData.firstName}
-                                                onChange={handleFormChange}
-                                                className={`w-full bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/20 focus:border-[#F5EFE6]' : 'border-[#001F3F]/10 focus:border-[#001F3F]'} py-2 text-[10px] uppercase tracking-[0.2em] font-light outline-none transition-colors placeholder:opacity-40`}
-                                            />
-                                            <input 
-                                                type="text"
-                                                name="lastName"
-                                                placeholder="LAST NAME"
-                                                disabled={signupStatus === 'loading'}
-                                                value={formData.lastName}
-                                                onChange={handleFormChange}
-                                                className={`w-full bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/20 focus:border-[#F5EFE6]' : 'border-[#001F3F]/10 focus:border-[#001F3F]'} py-2 text-[10px] uppercase tracking-[0.2em] font-light outline-none transition-colors placeholder:opacity-40`}
-                                            />
-                                        </div>
-                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
-                                            <input 
-                                                type="email"
-                                                name="email"
-                                                required
-                                                placeholder="EMAIL ADDRESS"
-                                                disabled={signupStatus === 'loading'}
-                                                value={formData.email}
-                                                onChange={handleFormChange}
-                                                className={`w-full sm:col-span-2 bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/20 focus:border-[#F5EFE6]' : 'border-[#001F3F]/10 focus:border-[#001F3F]'} py-2 text-[10px] uppercase tracking-[0.2em] font-light outline-none transition-colors placeholder:opacity-40`}
-                                            />
-                                            <input 
-                                                type="text"
-                                                name="city"
-                                                placeholder="CITY"
-                                                disabled={signupStatus === 'loading'}
-                                                value={formData.city}
-                                                onChange={handleFormChange}
-                                                className={`w-full bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/20 focus:border-[#F5EFE6]' : 'border-[#001F3F]/10 focus:border-[#001F3F]'} py-2 text-[10px] uppercase tracking-[0.2em] font-light outline-none transition-colors placeholder:opacity-40`}
-                                            />
-                                        </div>
-                                        <button 
-                                            type="submit" 
-                                            disabled={signupStatus === 'loading'}
-                                            className="text-[9px] uppercase tracking-[0.4em] font-bold pt-4 opacity-60 hover:opacity-100 transition-opacity disabled:opacity-30"
-                                        >
-                                            SUBSCRIBE TO THE LAST CHORD →
-                                        </button>
-                                    </>
-                                ) : (
-                                    <div className="py-4 text-center">
-                                        <p className="text-[10px] uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-400 font-bold">SUBSCRIBED</p>
-                                        <p className="text-[8px] uppercase tracking-[0.2em] opacity-50 mt-1">Successfully logged inside registry.</p>
-                                    </div>
-                                )}
-                                
-                                {signupStatus === 'loading' && <p className="text-[8px] uppercase tracking-[0.3em] opacity-40 animate-pulse">Syncing to Vault...</p>}
-                                {signupStatus === 'error' && <p className="text-[8px] uppercase tracking-[0.3em] text-rose-600 dark:text-rose-400 font-bold">Failed connection. Please retry.</p>}
-                            </form>
-                        </div>
-
-                        <div className="flex flex-col items-center space-y-6 animate-fade-in w-full max-w-xs mx-auto">
-                            <div className="group relative w-full">
-                                <a href="https://thelastchord.substack.com" target="_blank" className={`block text-center border ${darkMode ? 'border-[#F5EFE6]' : 'border-[#001F3F]'} w-full py-5 ${darkMode ? 'hover:bg-[#F5EFE6] hover:text-[#121212]' : 'hover:bg-[#001F3F] hover:text-[#D1E2F2]'} transition-all uppercase tracking-[0.4em] text-[10px] font-bold relative z-10`}>Read On Substack</a>
-                                <div className={`absolute top-2 left-2 w-full h-full border ${darkMode ? 'border-[#F5EFE6]/10' : 'border-[#001F3F]/10'} -z-0`}></div>
-                            </div>
-                            
-                            <button 
-                                onClick={() => { setViewingCollection(true); setCollectionSubFilter('All'); }}
-                                className={`text-[10px] uppercase tracking-[0.3em] font-bold opacity-50 hover:opacity-100 transition-opacity flex items-center space-x-2 mt-4`}
-                            >
-                                <span>Open My Collection</span>
-                                <span className={`text-[8px] px-2 py-0.5 rounded-full ${darkMode ? 'bg-[#F5EFE6] text-[#121212]' : 'bg-[#001F3F] text-[#D1E2F2]'}`}>{favorites.length}</span>
-                            </button>
-                        </div>
-                    </div>
-                );
-
+                if (activeTab === 'Home') return renderHome();
+                
+                // Articles, Songs, London, Tech
                 if (activeTab === 'Articles') {
                     return (
                         <div className="flex flex-col w-full">
                             <div className="w-full px-4 md:px-8 max-w-xl mx-auto mb-8 mt-2 flex flex-col items-center space-y-4 animate-fade-in">
                                 <div className="flex items-center space-x-6 text-[10px] uppercase tracking-[0.2em] font-bold">
                                     {selectedCategory !== 'Landing' && (
-                                        <button 
-                                            onClick={() => { setSelectedCategory('Landing'); setSearchQuery(''); }}
-                                            className="opacity-50 hover:opacity-100 transition-opacity flex items-center space-x-1"
-                                        >
+                                        <button onClick={() => { setSelectedCategory('Landing'); setSearchQuery(''); }} className="opacity-50 hover:opacity-100 transition-opacity flex items-center space-x-1">
                                             <span>← Index Deck</span>
                                         </button>
                                     )}
@@ -463,7 +559,6 @@
                                         {searchQuery.trim() !== '' ? 'Search Results' : selectedCategory === 'All' ? 'All Pieces' : selectedCategory !== 'Landing' ? selectedCategory.split(':')[0] : 'Editorial Registry'}
                                     </span>
                                 </div>
-
                                 {selectedCategory === 'All' && searchQuery.trim() === '' && (
                                     <div className="flex items-center space-x-4 text-[9px] uppercase tracking-[0.15em] opacity-60">
                                         <button onClick={() => setSortOrder('newest')} className={`transition-all ${sortOrder === 'newest' ? 'font-bold underline opacity-100' : 'hover:opacity-100'}`}>Newest First</button>
@@ -471,101 +566,41 @@
                                         <button onClick={() => setSortOrder('oldest')} className={`transition-all ${sortOrder === 'oldest' ? 'font-bold underline opacity-100' : 'hover:opacity-100'}`}>Oldest First</button>
                                     </div>
                                 )}
-
-                                <input 
-                                    type="text"
-                                    placeholder="Search..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className={`w-full max-w-xs bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/30 focus:border-[#F5EFE6]' : 'border-[#001F3F]/20 focus:border-[#001F3F]'} py-2 text-xs uppercase tracking-widest outline-none text-center transition-colors font-light placeholder:opacity-40`}
-                                />
+                                <input type="text" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className={`w-full max-w-xs bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/30 focus:border-[#F5EFE6]' : 'border-[#001F3F]/20 focus:border-[#001F3F]'} py-2 text-xs uppercase tracking-widest outline-none text-center transition-colors font-light placeholder:opacity-40`} />
                             </div>
-
                             {selectedCategory === 'Landing' && searchQuery.trim() === '' ? (
                                 <div className="w-full px-4 md:px-8 max-w-5xl mx-auto py-2 animate-fade-in flex flex-col items-center">
-                                    
-                                    <div className="text-center mb-8">
-                                        <h2 className="font-serif text-4xl italic tracking-tight mb-2">Editorial Registry</h2>
-                                        <p className="text-[10px] uppercase tracking-[0.3em] opacity-50">Select an archive sector or search all articles</p>
-                                    </div>
-
+                                    <div className="text-center mb-8"><h2 className="font-serif text-4xl italic tracking-tight mb-2">Editorial Registry</h2><p className="text-[10px] uppercase tracking-[0.3em] opacity-50">Select an archive sector or search all articles</p></div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full mb-40">
                                         {Object.keys(CATEGORY_MAP).map((key) => {
                                             const cat = CATEGORY_MAP[key];
                                             const isHovered = hoveredCategory === key;
-                                            return (
-                                                <div 
-                                                    key={key}
-                                                    onClick={() => setSelectedCategory(key)}
-                                                    onMouseEnter={() => setHoveredCategory(key)}
-                                                    onMouseLeave={() => setHoveredCategory(null)}
-                                                    className={`border ${darkMode ? 'border-[#F5EFE6]/20 hover:bg-[#F5EFE6] hover:text-[#121212]' : 'border-[#001F3F]/20 hover:bg-[#001F3F] hover:text-[#E6F0FA]'} p-8 h-56 flex flex-col justify-center items-center text-center cursor-pointer transition-all duration-300 relative group`}
-                                                >
-                                                    {isHovered ? (
-                                                        <p className="text-xs italic leading-relaxed px-2 font-light tracking-wide animate-fade-in">{cat.desc}</p>
-                                                    ) : (
-                                                        <div className="flex flex-col items-center space-y-3">
-                                                            <span className={`text-[9px] font-bold uppercase tracking-[0.2em] px-3 py-1 rounded-full ${cat.pillBg} ${cat.pillText}`}>
-                                                                {cat.title.split(':')[0]}
-                                                            </span>
-                                                            <h3 className="font-serif text-xl italic tracking-tight">{cat.title.includes(':') ? cat.title.split(':')[1].trim() : cat.title}</h3>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            );
+                                            return (<div key={key} onClick={() => setSelectedCategory(key)} onMouseEnter={() => setHoveredCategory(key)} onMouseLeave={() => setHoveredCategory(null)} className={`border ${darkMode ? 'border-[#F5EFE6]/20 hover:bg-[#F5EFE6] hover:text-[#121212]' : 'border-[#001F3F]/20 hover:bg-[#001F3F] hover:text-[#E6F0FA]'} p-8 h-56 flex flex-col justify-center items-center text-center cursor-pointer transition-all duration-300 relative group`}>
+                                            {isHovered ? <p className="text-xs italic leading-relaxed px-2 font-light tracking-wide animate-fade-in">{cat.desc}</p> : <div className="flex flex-col items-center space-y-3"><span className={`text-[9px] font-bold uppercase tracking-[0.2em] px-3 py-1 rounded-full ${cat.pillBg} ${cat.pillText}`}>{cat.title.split(':')[0]}</span><h3 className="font-serif text-xl italic tracking-tight">{cat.title.includes(':') ? cat.title.split(':')[1].trim() : cat.title}</h3></div>}</div>);
                                         })}
-
-                                        <div 
-                                            onClick={() => setSelectedCategory('All')}
-                                            className={`border border-dashed ${darkMode ? 'border-[#F5EFE6]/40 hover:bg-[#F5EFE6] hover:text-[#121212]' : 'border-[#001F3F]/30 hover:bg-[#001F3F] hover:text-[#E6F0FA]'} p-8 h-56 flex flex-col justify-center items-center text-center cursor-pointer transition-all duration-300 group`}
-                                        >
-                                            <h3 className="text-xs uppercase tracking-[0.4em] font-bold">Browse All Articles</h3>
-                                        </div>
+                                        <div onClick={() => setSelectedCategory('All')} className={`border border-dashed ${darkMode ? 'border-[#F5EFE6]/40 hover:bg-[#F5EFE6] hover:text-[#121212]' : 'border-[#001F3F]/30 hover:bg-[#001F3F] hover:text-[#E6F0FA]'} p-8 h-56 flex flex-col justify-center items-center text-center cursor-pointer transition-all duration-300 group`}><h3 className="text-xs uppercase tracking-[0.4em] font-bold">Browse All Articles</h3></div>
                                     </div>
                                 </div>
+                            ) : filteredStandardItems.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-40 px-6 text-center animate-fade-in opacity-40"><p className="font-serif text-xl italic mb-2">No elements found.</p><p className="text-[10px] uppercase tracking-widest font-light leading-relaxed">Adjust your filter or search criteria.</p></div>
                             ) : (
-                                filteredStandardItems.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center py-40 px-6 text-center animate-fade-in opacity-40">
-                                        <p className="font-serif text-xl italic mb-2">No elements found.</p>
-                                        <p className="text-[10px] uppercase tracking-widest font-light leading-relaxed">Adjust your filter or search criteria.</p>
-                                    </div>
-                                ) : (
-                                    <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-layout ${theme.layoutGrid} p-0.5 pb-80`}>
-                                        {filteredStandardItems.map((item, i) => renderCard(item, 'Articles', i))}
-                                    </div>
-                                )
+                                <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-layout ${theme.layoutGrid} p-0.5 pb-80`}>{filteredStandardItems.map((item, i) => renderCard(item, 'Articles', i))}</div>
                             )}
                         </div>
                     );
                 }
 
+                // Songs / London / New In Tech (default tabular)
                 return (
                     <div className="flex flex-col w-full">
                         <div className="w-full px-4 md:px-8 max-w-xl mx-auto mb-8 mt-2 flex flex-col items-center space-y-4 animate-fade-in">
-                            <div className="flex items-center space-x-6 text-[10px] uppercase tracking-[0.2em] font-bold">
-                                <span className={`pb-1 ${darkMode ? 'border-[#F5EFE6]' : 'border-[#001F3F]'}`}>
-                                    {activeTab}
-                                </span>
-                            </div>
-
-                            <input 
-                                type="text"
-                                placeholder="Search..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className={`w-full max-w-xs bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/30 focus:border-[#F5EFE6]' : 'border-[#001F3F]/20 focus:border-[#001F3F]'} py-2 text-xs uppercase tracking-widest outline-none text-center transition-colors font-light placeholder:opacity-40`}
-                            />
+                            <div className="flex items-center space-x-6 text-[10px] uppercase tracking-[0.2em] font-bold"><span className={`pb-1 ${darkMode ? 'border-[#F5EFE6]' : 'border-[#001F3F]'}`}>{activeTab}</span></div>
+                            <input type="text" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className={`w-full max-w-xs bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/30 focus:border-[#F5EFE6]' : 'border-[#001F3F]/20 focus:border-[#001F3F]'} py-2 text-xs uppercase tracking-widest outline-none text-center transition-colors font-light placeholder:opacity-40`} />
                         </div>
-
                         {filteredStandardItems.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-40 px-6 text-center animate-fade-in opacity-40">
-                                <p className="font-serif text-xl italic mb-2">No elements found.</p>
-                                <p className="text-[10px] uppercase tracking-widest font-light leading-relaxed">Adjust your filter or search criteria.</p>
-                            </div>
+                            <div className="flex flex-col items-center justify-center py-40 px-6 text-center animate-fade-in opacity-40"><p className="font-serif text-xl italic mb-2">No elements found.</p><p className="text-[10px] uppercase tracking-widest font-light leading-relaxed">Adjust your filter or search criteria.</p></div>
                         ) : (
-                            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-layout ${theme.layoutGrid} p-0.5 pb-80`}>
-                                {filteredStandardItems.map((item, i) => renderCard(item, activeTab, i))}
-                            </div>
+                            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-layout ${theme.layoutGrid} p-0.5 pb-80`}>{filteredStandardItems.map((item, i) => renderCard(item, activeTab, i))}</div>
                         )}
                     </div>
                 );
@@ -576,49 +611,19 @@
                     <nav className={`fixed top-0 w-full ${theme.navBg} backdrop-blur-md z-50 px-8 py-4 flex justify-between items-center border-b ${theme.border}`}>
                         <div className="flex items-center space-x-4">
                             <button onClick={() => { setActiveTab('Home'); setViewingCollection(false); }} className="hover:opacity-70 transition-opacity">
-                                <img src="https://trishrai.github.io/thelastchord/Logo.jpeg" alt="TLC" className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover border border-[#001F3F]/20 shadow-sm" />
+                                <img src="https://trishrai.github.io/thelastchord/Logo.jpeg" alt="TLC" className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover border shadow-sm" />
                             </button>
-                            
-                            <button 
-                                onClick={() => setDarkMode(!darkMode)} 
-                                className={`text-[8px] uppercase tracking-[0.3em] px-3 py-1 border ${darkMode ? 'border-[#F5EFE6]/30 text-[#F5EFE6]/60 hover:text-[#F5EFE6]' : 'border-[#001F3F]/20 text-[#001F3F]/60 hover:text-[#001F3F]'} rounded transition-all`}
-                            >
-                                {darkMode ? "Light Mode" : "Dark Mode"}
-                            </button>
+                            <button onClick={() => setDarkMode(!darkMode)} className={`text-[8px] uppercase tracking-[0.3em] px-3 py-1 border ${darkMode ? 'border-[#F5EFE6]/30 text-[#F5EFE6]/60 hover:text-[#F5EFE6]' : 'border-[#001F3F]/20 text-[#001F3F]/60 hover:text-[#001F3F]'} rounded transition-all`}>{darkMode ? "Light Mode" : "Dark Mode"}</button>
                         </div>
-                        
-                        <div className="hidden lg:block text-center flex-grow">
-                            <h2 className="text-[9px] md:text-[10px] uppercase tracking-[0.4em] font-bold opacity-70">
-                                {getPageHeader(activeTab)}
-                            </h2>
-                        </div>
-                        
+                        <div className="hidden lg:block text-center flex-grow"><h2 className="text-[9px] md:text-[10px] uppercase tracking-[0.4em] font-bold opacity-70">{getPageHeader(activeTab)}</h2></div>
                         <div className="flex items-center space-x-4">
-                            <button 
-                                onClick={() => { setViewingCollection(!viewingCollection); setSearchQuery(''); }}
-                                className={`text-[9px] uppercase tracking-[0.2em] font-bold px-3 py-1.5 border ${viewingCollection ? (darkMode ? 'bg-[#F5EFE6] text-[#121212]' : 'bg-[#001F3F] text-[#D1E2F2]') : 'border-transparent'} transition-all rounded flex items-center space-x-1`}
-                            >
-                                <span>My Collection ({favorites.length})</span>
-                            </button>
-
-                            <div className={`text-[9px] uppercase tracking-[0.5em] font-bold px-4 py-1.5 border ${theme.pillBorder} rounded-full hidden sm:block`}>
-                                {viewingCollection ? "Vault" : activeTab}
-                            </div>
+                            <button onClick={() => { setViewingCollection(!viewingCollection); setSearchQuery(''); }} className={`text-[9px] uppercase tracking-[0.2em] font-bold px-3 py-1.5 border ${viewingCollection ? (darkMode ? 'bg-[#F5EFE6] text-[#121212]' : 'bg-[#001F3F] text-[#D1E2F2]') : 'border-transparent'} transition-all rounded flex items-center space-x-1`}><span>My Collection ({favorites.length})</span></button>
+                            <div className={`text-[9px] uppercase tracking-[0.5em] font-bold px-4 py-1.5 border ${theme.pillBorder} rounded-full hidden sm:block`}>{viewingCollection ? "Vault" : activeTab}</div>
                         </div>
                     </nav>
-
                     <main className="pt-24 flex-grow mx-auto w-full max-w-[1600px]">{renderContent()}</main>
-
                     <footer className={`fixed bottom-0 w-full ${theme.footerBg} backdrop-blur-md border-t ${theme.border} flex justify-around p-6 text-[9px] uppercase font-bold tracking-[0.2em] z-50 shadow-sm`}>
-                        {['Home', 'Songs', 'London', 'Articles', 'New In Tech'].map(tab => (
-                            <button 
-                                key={tab} 
-                                onClick={() => { setActiveTab(tab); setViewingCollection(false); }} 
-                                className={(!viewingCollection && activeTab === tab) ? `scale-105 transition-transform border-b ${darkMode ? 'border-[#F5EFE6] text-[#F5EFE6]' : 'border-[#001F3F] text-[#001F3F]'}` : "opacity-30 hover:opacity-100 transition-all"}
-                            >
-                                {tab}
-                            </button>
-                        ))}
+                        {['Home', 'Songs', 'London', 'Articles', 'New In Tech'].map(tab => (<button key={tab} onClick={() => { setActiveTab(tab); setViewingCollection(false); }} className={(!viewingCollection && activeTab === tab) ? `scale-105 transition-transform border-b ${darkMode ? 'border-[#F5EFE6] text-[#F5EFE6]' : 'border-[#001F3F] text-[#001F3F]'}` : "opacity-30 hover:opacity-100 transition-all"}>{tab}</button>))}
                     </footer>
                 </div>
             );
