@@ -56,7 +56,8 @@
                                 Object.keys(row).forEach(k => { newRow[k.toLowerCase().trim()] = row[k]; });
                                 return newRow;
                             });
-                            setData(prev => ({ ...prev, [key]: cleanData }));
+                            // Reversing the cleanData array here so newest items display first across all tabs
+                            setData(prev => ({ ...prev, [key]: cleanData.reverse() }));
                         }
                     });
                 });
