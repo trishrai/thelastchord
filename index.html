@@ -44,7 +44,6 @@
                 return localStorage.getItem('tlc_dark_mode') === 'true';
             });
 
-            // Master Collection Pool containing structured items
             const [favorites, setFavorites] = useState(() => {
                 const cachedData = localStorage.getItem('tlc_favorites_v2');
                 return cachedData ? JSON.parse(cachedData) : [];
@@ -139,7 +138,7 @@
 
             const getPageHeader = (tab) => {
                 if (viewingCollection) return "YOUR MASTER COLLECTION DECK";
-                if (tab === 'Home') return "";
+                if (tab === 'Home') return "ABOUT THE LAST CHORD";
                 switch(tab) {
                     case 'Songs': return "SONG RECOMMENDATIONS FROM THE LAST CHORD";
                     case 'London': return "LONDON RECOMMENDATIONS FROM THE LAST CHORD";
@@ -149,7 +148,6 @@
                 }
             };
 
-            // Global save toggler that saves the full object data alongside origin channel references
             const toggleFavorite = (item, originTab) => {
                 const title = item.title || item.name || "Untitled";
                 const compositeKey = `${originTab}-${title}`;
@@ -168,7 +166,6 @@
                 return favorites.some(f => f.compositeKey === `${originTab}-${itemTitle}`);
             };
 
-            // Computed outputs for normal tab paths
             const filteredStandardItems = useMemo(() => {
                 const currentTabKey = activeTab === 'New In Tech' ? 'Tech' : activeTab;
                 let items = data[currentTabKey] || [];
@@ -191,7 +188,6 @@
                 });
             }, [data, activeTab, searchQuery, selectedCategory, sortOrder]);
 
-            // Computed outputs for the Unified Collection Dashboard
             const filteredCollectionItems = useMemo(() => {
                 let items = favorites;
                 
@@ -210,7 +206,6 @@
                 });
             }, [favorites, collectionSubFilter, searchQuery]);
 
-            // Layout Card Renderer
             const renderCard = (item, originTab, index) => {
                 const title = item.title || item.name || "Untitled";
                 let sub = item.summary || item.artist || item.category || "";
@@ -277,17 +272,15 @@
             };
 
             const renderContent = () => {
-                // UNIFIED CUSTOM GLOBAL COLLECTION DECK MODE
                 if (viewingCollection) {
                     return (
                         <div className="flex flex-col w-full">
                             <div className="w-full px-4 md:px-8 max-w-xl mx-auto mb-8 mt-2 flex flex-col items-center space-y-6 animate-fade-in">
                                 <div className="text-center">
                                     <h2 className="font-serif text-4xl italic tracking-tight mb-2">My Collection</h2>
-                                    <p className="text-[10px] uppercase tracking-[0.3em] opacity-50">Centralized Vault</p>
+                                    <p className="text-[10px] uppercase tracking-[0.3em] opacity-50">Centralised Vault</p>
                                 </div>
 
-                                {/* Custom Dropdown Select Filter */}
                                 <div className="flex flex-col items-center space-y-2 w-full max-w-xs">
                                     <label className="text-[8px] uppercase tracking-[0.3em] opacity-40 font-bold">Sort Vault Category</label>
                                     <select 
@@ -314,8 +307,8 @@
 
                             {filteredCollectionItems.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-40 px-6 text-center animate-fade-in opacity-40">
-                                    <p className="font-serif text-xl italic mb-2">Vault segment empty.</p>
-                                    <p className="text-[10px] uppercase tracking-widest font-light">No custom records found here.</p>
+                                    <p className="font-serif text-xl italic mb-2">Vault Empty.</p>
+                                    <p className="text-[10px] uppercase tracking-widest font-light">No records saved here.</p>
                                 </div>
                             ) : (
                                 <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-layout ${theme.layoutGrid} p-0.5 pb-80`}>
@@ -326,31 +319,86 @@
                     );
                 }
 
-                // HOME VIEW SCREEN
+                // HIGH-END EDITORIAL HOME & ABOUT ME COMBINED INTERFACE
                 if (activeTab === 'Home') return (
-                    <div className="flex flex-col items-center justify-center p-6 min-h-[75vh] text-center">
-                        <div className="mb-12 animate-fade-in">
+                    <div className="w-full px-4 md:px-12 max-w-5xl mx-auto py-12 pb-44 animate-fade-in space-y-24">
+                        
+                        {/* HERO HEADER REGION */}
+                        <div className="text-center py-6">
                              <h1 className="text-6xl md:text-8xl font-serif italic tracking-tighter leading-none">The Last Chord</h1>
                              <p className="text-[10px] uppercase tracking-[0.6em] font-bold opacity-40 mt-6 leading-loose">BY TRISHA RAI | EST. 2025</p>
+                             <p className="text-sm italic opacity-70 max-w-md mx-auto mt-6 font-light leading-relaxed">
+                                 A curated compendium investigating sonic landmarks, urban architecture, and creative blueprints.
+                             </p>
                         </div>
-                        <div className="flex flex-col items-center space-y-6 animate-fade-in w-full max-w-xs mx-auto">
-                            <div className="group relative w-full">
+
+                        {/* SPLIT LAYOUT PROFILE AND BIO ROW (ABOUT ME) */}
+                        <div className={`grid grid-cols-1 md:grid-cols-12 gap-8 items-center border-t border-b ${theme.border} py-12`}>
+                            <div className="md:col-span-4 flex justify-center">
+                                <div className="w-56 h-56 md:w-64 md:h-64 rounded-full overflow-hidden grayscale border-4 border-current p-1 opacity-90 shadow-xl">
+                                    <img 
+                                        src="https://trishrai.github.io/thelastchord/Logo.jpeg" 
+                                        alt="Trisha Rai Profile" 
+                                        className="w-full h-full object-cover rounded-full"
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div className="md:col-span-8 space-y-4">
+                                <span className="text-[9px] uppercase tracking-[0.3em] font-bold opacity-40 block">Behind the Desk</span>
+                                <h2 className="font-serif text-3xl italic tracking-tight">About Me & The Project</h2>
+                                <p className="text-xs font-light leading-relaxed opacity-80 text-justify">
+                                    Welcome to my corner of the internet. I'm Trisha Rai, a writer and curator focused on tracking cultural architecture, breakthrough art, and original long-form music analysis. <strong>The Last Chord</strong> is designed to cut directly past simple algorithm streams, providing a permanent home for curated records that truly matter.
+                                </p>
+                                <p className="text-xs font-light leading-relaxed opacity-80 text-justify">
+                                    Whether mapping historical sound movements under our editorial segments, showcasing hyper-local independent cultural corners in London, or dissecting shifting frameworks inside tech news outlets, this site serves as an interactive blueprint of my ongoing creative writing and visual research.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* NAVIGATIONAL MANIFESTO HIGHROAD CARD BLOCKS */}
+                        <div className="space-y-6">
+                            <div className="text-center">
+                                <h3 className="font-serif text-xl italic tracking-tight mb-1">Explore the Verticals</h3>
+                                <p className="text-[9px] uppercase tracking-widest opacity-40">Direct routing into the site's database pipelines</p>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+                                {[
+                                    { id: 'Songs', desc: 'Audio Curation' },
+                                    { id: 'London', desc: 'City Guide' },
+                                    { id: 'Articles', desc: 'Longform Essays' },
+                                    { id: 'New In Tech', desc: 'External Tech Outlets' }
+                                ].map(pillar => (
+                                    <div 
+                                        key={pillar.id}
+                                        onClick={() => setActiveTab(pillar.id)}
+                                        className={`border ${darkMode ? 'border-[#F5EFE6]/10 hover:bg-[#F5EFE6] hover:text-[#121212]' : 'border-[#001F3F]/10 hover:bg-[#001F3F] hover:text-[#E6F0FA]'} p-6 cursor-pointer transition-all duration-300 flex flex-col justify-center h-24`}
+                                    >
+                                        <h4 className="font-serif text-base italic leading-none mb-1">{pillar.id}</h4>
+                                        <span className="text-[8px] uppercase tracking-widest opacity-40 font-bold">{pillar.desc}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* ACTION CALL HOOK */}
+                        <div className="flex flex-col items-center pt-4 space-y-6">
+                            <div className="group relative w-full max-w-xs">
                                 <a href="https://thelastchord.substack.com" target="_blank" className={`block text-center border ${darkMode ? 'border-[#F5EFE6]' : 'border-[#001F3F]'} w-full py-5 ${darkMode ? 'hover:bg-[#F5EFE6] hover:text-[#121212]' : 'hover:bg-[#001F3F] hover:text-[#D1E2F2]'} transition-all uppercase tracking-[0.4em] text-[10px] font-bold relative z-10`}>Read On Substack</a>
                                 <div className={`absolute top-2 left-2 w-full h-full border ${darkMode ? 'border-[#F5EFE6]/10' : 'border-[#001F3F]/10'} -z-0`}></div>
                             </div>
                             
                             <button 
                                 onClick={() => { setViewingCollection(true); setCollectionSubFilter('All'); }}
-                                className={`text-[10px] uppercase tracking-[0.3em] font-bold opacity-50 hover:opacity-100 transition-opacity flex items-center space-x-2 mt-4`}
+                                className="text-[10px] uppercase tracking-[0.3em] font-bold opacity-50 hover:opacity-100 transition-opacity flex items-center space-x-2"
                             >
-                                <span>Open Global Collection</span>
-                                <span className={`text-[8px] px-2 py-0.5 rounded-full ${darkMode ? 'bg-[#F5EFE6] text-[#121212]' : 'bg-[#001F3F] text-[#D1E2F2]'}`}>{favorites.length}</span>
+                                <span>Open Vault Collection ({favorites.length})</span>
                             </button>
                         </div>
                     </div>
                 );
 
-                // MAIN EDITORIAL CATEGORY SELECTOR LANDING GRID
                 if (activeTab === 'Articles' && selectedCategory === 'Landing') {
                     return (
                         <div className="w-full px-4 md:px-8 max-w-5xl mx-auto py-6 animate-fade-in flex flex-col items-center">
@@ -360,7 +408,6 @@
                                 <p className="text-[10px] uppercase tracking-[0.3em] opacity-50">Select an archive sector to browse recommendations</p>
                             </div>
 
-                            {/* Pre-category Search Bar (Requirement #2) */}
                             <div className="w-full max-w-md mb-10 flex flex-col items-center">
                                 <input 
                                     type="text"
@@ -376,7 +423,6 @@
                                 />
                             </div>
                             
-                            {/* Seamless 3-Column Grid System that naturally integrates Browse All Inline */}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full mb-40">
                                 {Object.keys(CATEGORY_MAP).map((key) => {
                                     const cat = CATEGORY_MAP[key];
@@ -403,7 +449,6 @@
                                     );
                                 })}
 
-                                {/* Integrated Browse All Element avoids clipping borders (#1) */}
                                 <div 
                                     onClick={() => setSelectedCategory('All')}
                                     className={`border border-dashed ${darkMode ? 'border-[#F5EFE6]/40 hover:bg-[#F5EFE6] hover:text-[#121212]' : 'border-[#001F3F]/30 hover:bg-[#001F3F] hover:text-[#E6F0FA]'} p-8 h-56 flex flex-col justify-center items-center text-center cursor-pointer transition-all duration-300 group`}
@@ -416,7 +461,6 @@
                     );
                 }
 
-                // DYNAMIC CHANNELS DISPLAY GRID
                 return (
                     <div className="flex flex-col w-full">
                         <div className="w-full px-4 md:px-8 max-w-xl mx-auto mb-8 mt-2 flex flex-col items-center space-y-4 animate-fade-in">
@@ -489,7 +533,6 @@
                         </div>
                         
                         <div className="flex items-center space-x-4">
-                            {/* Globally accessible vault toggle button inside navigation shell */}
                             <button 
                                 onClick={() => { setViewingCollection(!viewingCollection); setSearchQuery(''); }}
                                 className={`text-[9px] uppercase tracking-[0.2em] font-bold px-3 py-1.5 border ${viewingCollection ? (darkMode ? 'bg-[#F5EFE6] text-[#121212]' : 'bg-[#001F3F] text-[#D1E2F2]') : 'border-transparent'} transition-all rounded flex items-center space-x-1`}
