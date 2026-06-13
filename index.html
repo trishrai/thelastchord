@@ -331,7 +331,7 @@
                         </div>
                         <div className="flex flex-col items-center space-y-6 animate-fade-in w-full max-w-xs mx-auto">
                             <div className="group relative w-full">
-                                <a href="https://thelastchord.substack.com" target="_blank" className={`block text-center border ${darkMode ? 'border-[#F5EFE6]' : 'border-[#001F3F]'} w-full py-5 ${darkMode ? 'hover:bg-[#F5EFE6] hover:text-[#121212]' : 'hover:bg-[#001F3F] hover:text-[#D1E2F2]'} transition-all uppercase tracking-[0.4em] text-[10px] font-bold relative z-10`}>Read On Substack</a>
+                                <a href="https://thelastchord.substack.com" target="_blank" className={`block text-center border ${darkMode ? 'border-[#F5EFE6]' : 'border-[#001F3F]' }} w-full py-5 ${darkMode ? 'hover:bg-[#F5EFE6] hover:text-[#121212]' : 'hover:bg-[#001F3F] hover:text-[#D1E2F2]'} transition-all uppercase tracking-[0.4em] text-[10px] font-bold relative z-10`}>Read On Substack</a>
                                 <div className={`absolute top-2 left-2 w-full h-full border ${darkMode ? 'border-[#F5EFE6]/10' : 'border-[#001F3F]/10'} -z-0`}></div>
                             </div>
                             
@@ -384,7 +384,6 @@
                             {selectedCategory === 'Landing' && searchQuery.trim() === '' ? (
                                 <div className="w-full px-4 md:px-8 max-w-5xl mx-auto py-2 animate-fade-in flex flex-col items-center">
                                     
-                                    {/* Adjusted Subheader Block text updated here */}
                                     <div className="text-center mb-8">
                                         <h2 className="font-serif text-4xl italic tracking-tight mb-2">Editorial Registry</h2>
                                         <p className="text-[10px] uppercase tracking-[0.3em] opacity-50">Select an archive sector or search all articles</p>
@@ -489,4 +488,43 @@
                         </div>
                         
                         <div className="hidden lg:block text-center flex-grow">
-                            <h2 className="text-[9px] md:text-[10px] uppercase tracking-
+                            <h2 className="text-[9px] md:text-[10px] uppercase tracking-[0.4em] font-bold opacity-70">
+                                {getPageHeader(activeTab)}
+                            </h2>
+                        </div>
+                        
+                        <div className="flex items-center space-x-4">
+                            <button 
+                                onClick={() => { setViewingCollection(!viewingCollection); setSearchQuery(''); }}
+                                className={`text-[9px] uppercase tracking-[0.2em] font-bold px-3 py-1.5 border ${viewingCollection ? (darkMode ? 'bg-[#F5EFE6] text-[#121212]' : 'bg-[#001F3F] text-[#D1E2F2]') : 'border-transparent'} transition-all rounded flex items-center space-x-1`}
+                            >
+                                <span>Collection ({favorites.length})</span>
+                            </button>
+
+                            <div className={`text-[9px] uppercase tracking-[0.5em] font-bold px-4 py-1.5 border ${theme.pillBorder} rounded-full hidden sm:block`}>
+                                {viewingCollection ? "Vault" : activeTab}
+                            </div>
+                        </div>
+                    </nav>
+
+                    <main className="pt-24 flex-grow mx-auto w-full max-w-[1600px]">{renderContent()}</main>
+
+                    <footer className={`fixed bottom-0 w-full ${theme.footerBg} backdrop-blur-md border-t ${theme.border} flex justify-around p-6 text-[9px] uppercase font-bold tracking-[0.2em] z-50 shadow-sm`}>
+                        {['Home', 'Songs', 'London', 'Articles', 'New In Tech'].map(tab => (
+                            <button 
+                                key={tab} 
+                                onClick={() => { setActiveTab(tab); setViewingCollection(false); }} 
+                                className={(!viewingCollection && activeTab === tab) ? `scale-105 transition-transform border-b ${darkMode ? 'border-[#F5EFE6] text-[#F5EFE6]' : 'border-[#001F3F] text-[#001F3F]'}` : "opacity-30 hover:opacity-100 transition-all"}
+                            >
+                                {tab}
+                            </button>
+                        ))}
+                    </footer>
+                </div>
+            );
+        };
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
