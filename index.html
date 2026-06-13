@@ -61,14 +61,14 @@
             const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', city: '' });
             const [signupStatus, setSignupStatus] = useState('idle'); // idle, loading, success, error
 
-            // PASTE YOUR GOOGLE WEB APP URL FROM STEP 2 RIGHT HERE:
-            const NEWSLETTER_SCRIPT_URL = "YOUR_GOOGLE_WEB_APP_URL_HERE";
+            
+            const NEWSLETTER_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzSZ6k73EZK0T7xuCalKSFQ61ztl3LYBdAcxr_ZtYSDoFTAFaHAVrJygjvG1-K1SRqZ3w/exec";
 
             const CSV_LINKS = {
-                Songs: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=0&single=true&output=csv",
-                London: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1791301794&single=true&output=csv",
-                Articles: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=116420010&single=true&output=csv",
-                Tech: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1956240315&single=true&output=csv"
+        Songs: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=0&single=true&output=csv",
+        London: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1791301794&single=true&output=csv",
+        Articles: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=116420010&single=true&output=csv",
+        Tech: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1956240315&single=true&output=csv"
             };
 
             const CATEGORY_MAP = {
@@ -261,7 +261,7 @@
                             {img ? (
                                 <img src={img} className="w-full h-full object-cover grayscale opacity-90 transition-transform duration-700 group-hover:scale-110" />
                             ) : (
-                                <div className={`w-full h-full ${theme.placeholderBg} flex items-center justify-center text-[10px] uppercase tracking-widest opacity-20`}>No Image Provided</div>
+                                <div className={`w-full h-full ${theme.placeholderBg} flex items-center justify-center text-[10px] uppercase tracking-widest opacity-50`}>No Image Provided</div>
                             )}
                         </div>
                         
