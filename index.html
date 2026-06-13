@@ -57,11 +57,18 @@
             const [hoveredCategory, setHoveredCategory] = useState(null); 
             const [data, setData] = useState({ Songs: [], London: [], Articles: [], Tech: [] });
 
+            // Expanded registration states
+            const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', city: '' });
+            const [signupStatus, setSignupStatus] = useState('idle'); // idle, loading, success, error
+
+            // PASTE YOUR GOOGLE WEB APP URL FROM STEP 2 RIGHT HERE:
+            const NEWSLETTER_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwd1mN9KoMgOK0gjAYKGuBXzdycjybbJFiOxgnSsIjIxsNx8oGNIJTpFKQ2bcup08JpLg/exec";
+
             const CSV_LINKS = {
-                Songs: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=0&single=true&output=csv",
-                London: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1791301794&single=true&output=csv",
-                Articles: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=116420010&single=true&output=csv",
-                Tech: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1956240315&single=true&output=csv"
+                Songs: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=0&single=true&output=csv",
+                London: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1791301794&single=true&output=csv",
+                Articles: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=116420010&single=true&output=csv",
+                Tech: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1956240315&single=true&output=csv"
             };
 
             const CATEGORY_MAP = {
@@ -164,6 +171,32 @@
 
             const isItemSaved = (itemTitle, originTab) => {
                 return favorites.some(f => f.compositeKey === `${originTab}-${itemTitle}`);
+            };
+
+            const handleFormChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({ ...prev, [name]: value }));
+            };
+
+            const handleSubscribe = async (e) => {
+                e.preventDefault();
+                if (!formData.email.trim()) return;
+
+                setSignupStatus('loading');
+                try {
+                    await fetch(NEWSLETTER_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    setSignupStatus('success');
+                    setFormData({ firstName: '', lastName: '', email: '', city: '' });
+                } catch (error) {
+                    setSignupStatus('error');
+                    console.error("Signup failed:", error);
+                }
             };
 
             const filteredStandardItems = useMemo(() => {
@@ -324,11 +357,78 @@
                 }
 
                 if (activeTab === 'Home') return (
-                    <div className="flex flex-col items-center justify-center p-6 min-h-[75vh] text-center">
-                        <div className="mb-12 animate-fade-in">
+                    <div className="flex flex-col items-center justify-center p-6 min-h-[80vh] text-center">
+                        <div className="mb-6 animate-fade-in">
                              <h1 className="text-6xl md:text-8xl font-serif italic tracking-tighter leading-none">The Last Chord</h1>
-                             <p className="text-[10px] uppercase tracking-[0.6em] font-bold opacity-40 mt-6 leading-loose">BY TRISHA RAI | EST. 2025</p>
+                             <p className="text-[10px] uppercase tracking-[0.6em] font-bold opacity-40 mt-5 leading-loose">BY TRISHA RAI | EST. 2025</p>
                         </div>
+                        
+                        {/* Upgraded Multi-field Registration Form */}
+                        <div className="w-full max-w-md mx-auto mb-10 p-6 animate-fade-in">
+                            <form onSubmit={handleSubscribe} className="flex flex-col space-y-4">
+                                {signupStatus !== 'success' ? (
+                                    <>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <input 
+                                                type="text"
+                                                name="firstName"
+                                                placeholder="FIRST NAME"
+                                                disabled={signupStatus === 'loading'}
+                                                value={formData.firstName}
+                                                onChange={handleFormChange}
+                                                className={`w-full bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/20 focus:border-[#F5EFE6]' : 'border-[#001F3F]/10 focus:border-[#001F3F]'} py-2 text-[10px] uppercase tracking-[0.2em] font-light outline-none transition-colors placeholder:opacity-40`}
+                                            />
+                                            <input 
+                                                type="text"
+                                                name="lastName"
+                                                placeholder="LAST NAME"
+                                                disabled={signupStatus === 'loading'}
+                                                value={formData.lastName}
+                                                onChange={handleFormChange}
+                                                className={`w-full bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/20 focus:border-[#F5EFE6]' : 'border-[#001F3F]/10 focus:border-[#001F3F]'} py-2 text-[10px] uppercase tracking-[0.2em] font-light outline-none transition-colors placeholder:opacity-40`}
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+                                            <input 
+                                                type="email"
+                                                name="email"
+                                                required
+                                                placeholder="EMAIL ADDRESS"
+                                                disabled={signupStatus === 'loading'}
+                                                value={formData.email}
+                                                onChange={handleFormChange}
+                                                className={`w-full sm:col-span-2 bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/20 focus:border-[#F5EFE6]' : 'border-[#001F3F]/10 focus:border-[#001F3F]'} py-2 text-[10px] uppercase tracking-[0.2em] font-light outline-none transition-colors placeholder:opacity-40`}
+                                            />
+                                            <input 
+                                                type="text"
+                                                name="city"
+                                                placeholder="CITY"
+                                                disabled={signupStatus === 'loading'}
+                                                value={formData.city}
+                                                onChange={handleFormChange}
+                                                className={`w-full bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/20 focus:border-[#F5EFE6]' : 'border-[#001F3F]/10 focus:border-[#001F3F]'} py-2 text-[10px] uppercase tracking-[0.2em] font-light outline-none transition-colors placeholder:opacity-40`}
+                                            />
+                                        </div>
+                                        <button 
+                                            type="submit" 
+                                            disabled={signupStatus === 'loading'}
+                                            className="text-[9px] uppercase tracking-[0.4em] font-bold pt-4 opacity-60 hover:opacity-100 transition-opacity disabled:opacity-30"
+                                        >
+                                            SUBSCRIBE TO THE LAST CHORD →
+                                        </button>
+                                    </>
+                                ) : (
+                                    <div className="py-4 text-center">
+                                        <p className="text-[10px] uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-400 font-bold">SUBSCRIBED</p>
+                                        <p className="text-[8px] uppercase tracking-[0.2em] opacity-50 mt-1">Successfully logged inside registry.</p>
+                                    </div>
+                                )}
+                                
+                                {signupStatus === 'loading' && <p className="text-[8px] uppercase tracking-[0.3em] opacity-40 animate-pulse">Syncing to Vault...</p>}
+                                {signupStatus === 'error' && <p className="text-[8px] uppercase tracking-[0.3em] text-rose-600 dark:text-rose-400 font-bold">Failed connection. Please retry.</p>}
+                            </form>
+                        </div>
+
                         <div className="flex flex-col items-center space-y-6 animate-fade-in w-full max-w-xs mx-auto">
                             <div className="group relative w-full">
                                 <a href="https://thelastchord.substack.com" target="_blank" className={`block text-center border ${darkMode ? 'border-[#F5EFE6]' : 'border-[#001F3F]'} w-full py-5 ${darkMode ? 'hover:bg-[#F5EFE6] hover:text-[#121212]' : 'hover:bg-[#001F3F] hover:text-[#D1E2F2]'} transition-all uppercase tracking-[0.4em] text-[10px] font-bold relative z-10`}>Read On Substack</a>
