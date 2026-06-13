@@ -36,7 +36,10 @@
         const { useState, useEffect } = React;
 
         const App = () => {
-            const [activeTab, setActiveTab] = useState('Home');
+            // 1. Check if a tab was saved in localStorage on a previous session; default to 'Home'
+            const [activeTab, setActiveTab] = useState(() => {
+                return localStorage.getItem('tlc_active_tab') || 'Home';
+            });
             const [data, setData] = useState({ Songs: [], London: [], Articles: [], Tech: [] });
 
             const CSV_LINKS = {
@@ -45,6 +48,11 @@
                 Articles: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=116420010&single=true&output=csv",
                 Tech: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1956240315&single=true&output=csv"
             };
+
+            // 2. Save the active tab to localStorage whenever it changes
+            useEffect(() => {
+                localStorage.setItem('tlc_active_tab', activeTab);
+            }, [activeTab]);
 
             useEffect(() => {
                 Object.keys(CSV_LINKS).forEach(key => {
@@ -56,7 +64,6 @@
                                 Object.keys(row).forEach(k => { newRow[k.toLowerCase().trim()] = row[k]; });
                                 return newRow;
                             });
-                            // Reversing the cleanData array here so newest items display first across all tabs
                             setData(prev => ({ ...prev, [key]: cleanData.reverse() }));
                         }
                     });
@@ -173,7 +180,7 @@
                 </div>
             );
         };
-        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+        ReactDOM.createRoot(document.getElementById('root')).render(() => <App />);
     </script>
 </body>
 </html>
