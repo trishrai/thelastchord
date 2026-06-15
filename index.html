@@ -57,10 +57,10 @@
             const [hoveredCategory, setHoveredCategory] = useState(null); 
             const [data, setData] = useState({ Songs: [], London: [], Articles: [], Tech: [] });
 
-            
+            // Collapsible home description states
             const [showAbout, setShowAbout] = useState(false);
 
-            
+            // Form Data State
             const [formData, setFormData] = useState({ firstName: '', lastName: '', citySelection: 'London', customCity: '', email: '' });
             const [signupStatus, setSignupStatus] = useState('idle'); 
 
@@ -73,7 +73,6 @@
                 Tech: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1956240315&single=true&output=csv"
             };
 
-         
             const CATEGORY_MAP = {
                 "The Last Chord": {
                     title: "The Last Chord",
@@ -190,7 +189,6 @@
                 e.preventDefault();
                 if (!formData.email.trim()) return;
 
-                
                 const resolvedCity = formData.citySelection === 'Other' ? formData.customCity : formData.citySelection;
 
                 const payload = {
@@ -435,7 +433,7 @@
                                                     disabled={signupStatus === 'loading'}
                                                     value={formData.firstName}
                                                     onChange={handleFormChange}
-                                                    className={`w-full bg-transparent border-b-2 ${darkMode ? 'border-[#F5EFE6] text-[#F5EFE6]' : 'border-[#001F3F] text-[#001F3F]'} py-2 text-[11px] uppercase tracking-[0.2em] font-bold outline-none placeholder:text-current placeholder:opacity-50`}
+                                                    className={`w-full bg-transparent border-b-2 ${darkMode ? 'border-[#F5EFE6] text-[#F5EFE6]' : 'border-[#001F3F] text-[#001F3F]'}' py-2 text-[11px] uppercase tracking-[0.2em] font-bold outline-none placeholder:text-current placeholder:opacity-50`}
                                                 />
                                             </div>
                                             <div className="flex flex-col">
@@ -447,7 +445,7 @@
                                                     disabled={signupStatus === 'loading'}
                                                     value={formData.lastName}
                                                     onChange={handleFormChange}
-                                                    className={`w-full bg-transparent border-b-2 ${darkMode ? 'border-[#F5EFE6] text-[#F5EFE6]' : 'border-[#001F3F] text-[#001F3F]'} py-2 text-[11px] uppercase tracking-[0.2em] font-bold outline-none placeholder:text-current placeholder:opacity-50`}
+                                                    className={`w-full bg-transparent border-b-2 ${darkMode ? 'border-[#F5EFE6] text-[#F5EFE6]' : 'border-[#001F3F] text-[#001F3F]'}' py-2 text-[11px] uppercase tracking-[0.2em] font-bold outline-none placeholder:text-current placeholder:opacity-50`}
                                                 />
                                             </div>
                                         </div>
@@ -490,7 +488,6 @@
                                             </div>
                                         </div>
 
-                                        {/* Conditional formatting modal for text-specified cities */}
                                         {formData.citySelection === 'Other' && (
                                             <div className="flex flex-col pt-2 animate-fade-in">
                                                 <input 
@@ -593,7 +590,6 @@
                                                     onMouseLeave={() => setHoveredCategory(null)}
                                                     className="border border-neutral-400/40 h-56 flex flex-col justify-center items-center text-center cursor-pointer transition-all duration-300 relative group overflow-hidden bg-black text-white"
                                                 >
-                                                    {/* Background category image cover setup */}
                                                     <img 
                                                         src={cat.cover} 
                                                         alt={cat.title} 
@@ -725,7 +721,8 @@
             );
         };
 
-        ReactDOM.createRoot(document.getElementById('root')).render(App);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
 </body>
 </html>
