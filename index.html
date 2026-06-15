@@ -27,7 +27,7 @@
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0, 31, 63, 0.2); border-radius: 10px; }
         .grid-layout { gap: 1px !important; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeInUp 1.2s ease-out forwards; }
+        .animate-fade-in { animation: fadeInUp 1s ease-out forwards; }
     </style>
 </head>
 <body>
@@ -57,44 +57,53 @@
             const [hoveredCategory, setHoveredCategory] = useState(null); 
             const [data, setData] = useState({ Songs: [], London: [], Articles: [], Tech: [] });
 
-            // Form State matching requested order
-            const [formData, setFormData] = useState({ firstName: '', lastName: '', city: 'London', email: '' });
+            
+            const [showAbout, setShowAbout] = useState(false);
+
+            
+            const [formData, setFormData] = useState({ firstName: '', lastName: '', citySelection: 'London', customCity: '', email: '' });
             const [signupStatus, setSignupStatus] = useState('idle'); 
 
             const NEWSLETTER_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwd1mN9KoMgOK0gjAYKGuBXzdycjybbJFiOxgnSsIjIxsNx8oGNIJTpFKQ2bcup08JpLg/exec";
 
             const CSV_LINKS = {
-                Songs: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=0&single=true&output=csv",
-                London: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1791301794&single=true&output=csv",
-                Articles: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=116420010&single=true&output=csv",
-                Tech: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1956240315&single=true&output=csv"
+                Songs: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=0&single=true&output=csv",
+                London: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1791301794&single=true&output=csv",
+                Articles: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=116420010&single=true&output=csv",
+                Tech: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1956240315&single=true&output=csv"
             };
 
+         
             const CATEGORY_MAP = {
                 "The Last Chord": {
                     title: "The Last Chord",
                     pillBg: "bg-[#DDEBFA]", pillText: "text-[#1E40AF]",
-                    desc: "Welcome to The Last Chord. Read about us here."
+                    desc: "Welcome to The Last Chord. Read about us here.",
+                    cover: "https://trishrai.github.io/thelastchord/Logo.jpeg"
                 },
                 "Off The Record: Opinion Pieces": {
                     title: "Off The Record: Opinion Pieces",
                     pillBg: "bg-[#E2F0D9]", pillText: "text-[#2E7D32]",
-                    desc: "Welcome to Off the Record, where art meets insight. We offer sharp, unfiltered opinion pieces on cultural shifts, the evolution of sound, and the timeless debates shaping the industry."
+                    desc: "Welcome to Off the Record, where art meets insight. We offer sharp, unfiltered opinion pieces on cultural shifts, the evolution of sound, and the timeless debates shaping the industry.",
+                    cover: "https://trishrai.github.io/thelastchord/opinions.jpeg"
                 },
                 "The Sonic Lens: Analysis": {
                     title: "The Sonic Lens: Analysis",
                     pillBg: "bg-[#F3E5F5]", pillText: "text-[#6A1B9A]",
-                    desc: "Welcome to The Sonic Lens. We examine the intersection of art, culture, and society through a critical eye. From the evolution of musical traditions to the impact of iconic movements, we offer thought-provoking analysis on how art shapes our world."
+                    desc: "Welcome to The Sonic Lens. We examine the intersection of art, culture, and society through a critical eye. From the evolution of musical traditions to the impact of iconic movements, we offer thought-provoking analysis on how art shapes our world.",
+                    cover: "https://trishrai.github.io/thelastchord/analysis.jpeg"
                 },
                 "Studio Sessions: Interviews": {
                     title: "Studio Sessions: Interviews",
                     pillBg: "bg-[#E0F2F1]", pillText: "text-[#00695C]",
-                    desc: "Welcome to Studio Sessions, where creativity meets conversation. We interview musicians, writers, and visual creators to uncover the stories behind their art. Dive deep into the processes, struggles, and passions that drive the creative world."
+                    desc: "Welcome to Studio Sessions, where creativity meets conversation. We interview musicians, writers, and visual creators to uncover the stories behind their art. Dive deep into the processes, struggles, and passions that drive the creative world.",
+                    cover: "https://trishrai.github.io/thelastchord/interviews.jpeg"
                 },
                 "Soundcheck: Reviews": {
                     title: "Soundcheck: Reviews",
                     pillBg: "bg-[#FCE4EC]", pillText: "text-[#C2185B]",
-                    desc: "Welcome to Soundcheck, the reviews section of The Last Chord. We cover albums, films, art, and culture that leave a mark. Beyond simple critiques, we unpack the storytelling, rebellion, and raw emotion behind every piece."
+                    desc: "Welcome to Soundcheck, the reviews section of The Last Chord. We cover albums, films, art, and culture that leave a mark. Beyond simple critiques, we unpack the storytelling, rebellion, and raw emotion behind every piece.",
+                    cover: "https://trishrai.github.io/thelastchord/soundcheck.jpeg"
                 }
             };
 
@@ -181,17 +190,27 @@
                 e.preventDefault();
                 if (!formData.email.trim()) return;
 
+                
+                const resolvedCity = formData.citySelection === 'Other' ? formData.customCity : formData.citySelection;
+
+                const payload = {
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    city: resolvedCity || 'Other',
+                    email: formData.email
+                };
+
                 setSignupStatus('loading');
                 try {
                     await fetch(NEWSLETTER_SCRIPT_URL, {
                         method: 'POST',
                         mode: 'no-cors',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(formData)
+                        body: JSON.stringify(payload)
                     });
                     
                     setSignupStatus('success');
-                    setFormData({ firstName: '', lastName: '', city: 'London', email: '' });
+                    setFormData({ firstName: '', lastName: '', citySelection: 'London', customCity: '', email: '' });
                 } catch (error) {
                     setSignupStatus('error');
                     console.error("Signup failed:", error);
@@ -228,7 +247,7 @@
                 let items = favorites;
                 
                 if (collectionSubFilter !== 'All') {
-                    const targetOrigin = collectionSubFilter === 'News in Tech' ? 'New In Tech' : collectionSubFilter;
+                    const targetOrigin = collectionSubFilter === 'New in Tech' ? 'New In Tech' : collectionSubFilter;
                     items = items.filter(f => f.originTab === targetOrigin);
                 }
 
@@ -275,7 +294,7 @@
                                     <h3 className="font-serif text-3xl italic mb-2">{title}</h3>
                                     <p className={`text-[10px] uppercase tracking-widest font-bold opacity-50 mb-6 border-b ${darkMode ? 'border-[#121212]/20' : 'border-[#E6F0FA]/20'} pb-4`}>{sub}</p>
                                 </div>
-                                <span className="text-[7px] uppercase tracking-widest border border-current px-2 py-0.5 rounded opacity-40">{originTab}</span>
+                                <span className="text-[7px] uppercase tracking-widest border border-current px-2 py-0.5 rounded opacity-40">{originTab === 'New In Tech' ? 'Tech' : originTab}</span>
                             </div>
                             
                             <div className="mb-6 space-y-1 text-[9px] uppercase tracking-[0.2em] opacity-60 italic font-light">
@@ -328,7 +347,7 @@
                                         <option value="Songs">Songs</option>
                                         <option value="Articles">Articles</option>
                                         <option value="London">London</option>
-                                        <option value="News in Tech">News in Tech</option>
+                                        <option value="News in Tech">New in Tech</option>
                                     </select>
                                 </div>
 
@@ -356,39 +375,52 @@
                 }
 
                 if (activeTab === 'Home') return (
-                    <div className="w-full max-w-3xl mx-auto px-6 py-12 md:py-20 flex flex-col text-left animate-fade-in pb-40">
+                    <div className="w-full max-w-3xl mx-auto px-6 py-12 md:py-20 flex flex-col text-center items-center animate-fade-in pb-40">
                         {/* Title Block */}
-                        <div className="mb-14">
+                        <div className="mb-6">
                              <h1 className="text-5xl md:text-6xl font-serif italic tracking-tighter leading-none">THE LAST CHORD</h1>
-                             <p className="text-[10px] uppercase tracking-[0.5em] font-bold opacity-60 mt-4">BY TRISHA RAI | EST. 2025</p>
+                             <p className="text-[10px] uppercase tracking-[0.5em] font-bold opacity-60 mt-4 mb-3">BY TRISHA RAI | EST. 2025</p>
+                             <a href="https://thelastchord.substack.com" target="_blank" className="text-xs uppercase font-bold tracking-widest underline hover:opacity-70 transition-opacity">Read on Substack</a>
                         </div>
                         
-                        {/* Copy Block */}
-                        <div className="space-y-12 mb-16 text-sm md:text-base leading-relaxed font-light opacity-95">
-                            <section>
-                                <h2 className="text-xl md:text-2xl font-serif italic mb-4">About The Last Chord</h2>
-                                <p className="opacity-90">
-                                    Launched in February 2025 by Founder Trisha Rai, The Last Chord is an online digital platform celebrating, exploring, and analysing the intersection between technology and culture. From in-depth insights into London's vibrant arts, culture, and music scene to critical think pieces about the evolution of artificial intelligence and its impacts on society, The Last Chord promises intellectual conversations, nuanced debates, and a holistic understanding of all sides of the coin.
-                                </p>
-                            </section>
-
-                            <section className={`p-8 border ${darkMode ? 'border-[#F5EFE6]/20 bg-[#F5EFE6]/5' : 'border-[#001F3F]/20 bg-white/40'}`}>
-                                <h2 className="text-xl md:text-2xl font-serif italic mb-4">About the Founder</h2>
-                                <p className="opacity-90 mb-4">
-                                    Founded by Trisha Rai, The Last Chord is a platform dedicated to exploring the intersection of technology, culture, and our daily lives. Rai was born in India and raised in Hong Kong before moving to London in 2020 to pursue her undergraduate studies at the London School of Economics and Political Science. It was during this time that Rai became captivated by the profound ways technology shapes everyday experiences.
-                                </p>
-                                <p className="opacity-90 mb-4">
-                                    Driven by a desire to bridge the gap between complex digital shifts and human-centric storytelling, Rai founded The Last Chord in 2025. Whether dissecting the latest pop culture phenomena or analysing the implications of emerging AI policies, every piece on the site is researched, developed, edited, and written by Rai.
-                                </p>
-                                <p className="opacity-90">
-                                    Currently, Rai is pursuing a Master’s in Digital Humanities at University College London, where her research focuses on the evolving relationship between technology, culture, and artificial intelligence. Rai continues to run, edit, and write for The Last Chord full-time, building a space for thoughtful discussion and debate on the things that matter most. This entire web app has been personally coded, built, and developed by Rai.
-                                </p>
-                            </section>
+                        {/* Clickable Image Logo & Prompt Link */}
+                        <div className="my-8 flex flex-col items-center space-y-4">
+                            <button onClick={() => setShowAbout(!showAbout)} className="focus:outline-none group transform hover:scale-[1.02] transition-transform duration-300">
+                                <img src="https://trishrai.github.io/thelastchord/Logo.jpeg" alt="The Last Chord Logo" className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-2 border-current shadow-md grayscale group-hover:grayscale-0 transition-all duration-500" />
+                            </button>
+                            <button onClick={() => setShowAbout(!showAbout)} className="text-[11px] uppercase tracking-[0.3em] font-bold border-b border-current pb-0.5 hover:opacity-70 transition-all">
+                                {showAbout ? "Click here to hide overview ▲" : "Click here to read about the last chord ▼"}
+                            </button>
                         </div>
 
-                        {/* High Contrast / Solid Opacity Registration Box */}
-                        <div className={`p-8 border-2 ${darkMode ? 'border-[#F5EFE6] bg-[#1C1C1E]' : 'border-[#001F3F] bg-white'}`}>
-                            <h3 className="text-lg font-serif italic mb-6">Join the Registry</h3>
+                        {/* Interactive Collapsible Copy Block */}
+                        {showAbout && (
+                            <div className="space-y-12 my-8 text-left text-sm md:text-base leading-relaxed font-light opacity-95 animate-fade-in max-w-2xl w-full">
+                                <section className="border-l-2 border-current pl-6">
+                                    <h2 className="text-xl md:text-2xl font-serif italic mb-4">About The Last Chord</h2>
+                                    <p className="opacity-90">
+                                        Launched in February 2025 by Founder Trisha Rai, The Last Chord is an online digital platform celebrating, exploring, and analysing the intersection between technology and culture. From in-depth insights into London's vibrant arts, culture, and music scene to critical think pieces about the evolution of artificial intelligence and its impacts on society, The Last Chord promises intellectual conversations, nuanced debates, and a holistic understanding of all sides of the coin.
+                                    </p>
+                                </section>
+
+                                <section className={`p-8 border ${darkMode ? 'border-[#F5EFE6]/20 bg-[#F5EFE6]/5' : 'border-[#001F3F]/20 bg-white/40'}`}>
+                                    <h2 className="text-xl md:text-2xl font-serif italic mb-4">About the Founder</h2>
+                                    <p className="opacity-90 mb-4">
+                                        Founded by Trisha Rai, The Last Chord is a platform dedicated to exploring the intersection of technology, culture, and our daily lives. Rai was born in India and raised in Hong Kong before moving to London in 2020 to pursue her undergraduate studies at the London School of Economics and Political Science. It was during this time that Rai became captivated by the profound ways technology shapes everyday experiences.
+                                    </p>
+                                    <p className="opacity-90 mb-4">
+                                        Driven by a desire to bridge the gap between complex digital shifts and human-centric storytelling, Rai founded The Last Chord in 2025. Whether dissecting the latest pop culture phenomena or analysing the implications of emerging AI policies, every piece on the site is researched, developed, edited, and written by Rai.
+                                    </p>
+                                    <p className="opacity-90">
+                                        Currently, Rai is pursuing a Master’s in Digital Humanities at University College London, where her research focuses on the evolving relationship between technology, culture, and artificial intelligence. Rai continues to run, edit, and write for The Last Chord full-time, building a space for thoughtful discussion and debate on the things that matter most. This entire web app has been personally coded, built, and developed by Rai.
+                                    </p>
+                                </section>
+                            </div>
+                        )}
+
+                        {/* High Contrast Registration Box */}
+                        <div className={`p-8 border-2 ${darkMode ? 'border-[#F5EFE6] bg-[#1C1C1E]' : 'border-[#001F3F] bg-white'} w-full max-w-lg mt-8 text-left`}>
+                            <h3 className="text-xs uppercase tracking-[0.3em] font-bold mb-6 opacity-80 text-center md:text-left">Sign up to the last chord registry</h3>
                             
                             <form onSubmit={handleSubscribe} className="flex flex-col space-y-5">
                                 {signupStatus !== 'success' ? (
@@ -424,16 +456,23 @@
                                             <div className="flex flex-col md:col-span-1">
                                                 <label className="text-[8px] uppercase tracking-widest font-bold mb-1 opacity-70">Select City</label>
                                                 <select 
-                                                    name="city"
+                                                    name="citySelection"
                                                     disabled={signupStatus === 'loading'}
-                                                    value={formData.city}
+                                                    value={formData.citySelection}
                                                     onChange={handleFormChange}
                                                     className={`w-full bg-transparent border-b-2 ${darkMode ? 'border-[#F5EFE6] text-[#F5EFE6] bg-[#1C1C1E]' : 'border-[#001F3F] text-[#001F3F] bg-white'} py-1.5 text-[11px] uppercase tracking-[0.15em] font-bold outline-none rounded-none cursor-pointer`}
                                                 >
                                                     <option value="London">London</option>
                                                     <option value="Hong Kong">Hong Kong</option>
                                                     <option value="Delhi">Delhi</option>
-                                                    <option value="Other">Other</option>
+                                                    <option value="New York">New York</option>
+                                                    <option value="Paris">Paris</option>
+                                                    <option value="Tokyo">Tokyo</option>
+                                                    <option value="Sydney">Sydney</option>
+                                                    <option value="Mumbai">Mumbai</option>
+                                                    <option value="Singapore">Singapore</option>
+                                                    <option value="Los Angeles">Los Angeles</option>
+                                                    <option value="Other">Other (Please Specify)</option>
                                                 </select>
                                             </div>
 
@@ -451,18 +490,34 @@
                                             </div>
                                         </div>
 
+                                        {/* Conditional formatting modal for text-specified cities */}
+                                        {formData.citySelection === 'Other' && (
+                                            <div className="flex flex-col pt-2 animate-fade-in">
+                                                <input 
+                                                    type="text"
+                                                    name="customCity"
+                                                    required
+                                                    placeholder="ENTER YOUR CITY NAME"
+                                                    disabled={signupStatus === 'loading'}
+                                                    value={formData.customCity}
+                                                    onChange={handleFormChange}
+                                                    className={`w-full bg-transparent border-b-2 ${darkMode ? 'border-rose-400 text-rose-400' : 'border-rose-700 text-rose-700'} py-2 text-[11px] uppercase tracking-[0.2em] font-bold outline-none placeholder:text-current placeholder:opacity-60`}
+                                                />
+                                            </div>
+                                        )}
+
                                         <button 
                                             type="submit" 
                                             disabled={signupStatus === 'loading'}
                                             className={`text-[10px] uppercase tracking-[0.4em] font-bold py-4 border-2 transition-all text-center mt-4 ${darkMode ? 'border-[#F5EFE6] bg-[#F5EFE6] text-[#121212] hover:bg-transparent hover:text-[#F5EFE6]' : 'border-[#001F3F] bg-[#001F3F] text-white hover:bg-transparent hover:text-[#001F3F]'}`}
                                         >
-                                            {signupStatus === 'loading' ? 'SYNCING TO VAULT...' : 'SUBSCRIBE TO THE LAST CHORD →'}
+                                            {signupStatus === 'loading' ? 'LOADING...' : 'SUBSCRIBE TO THE LAST CHORD →'}
                                         </button>
                                     </>
                                 ) : (
                                     <div className="py-6 text-center animate-fade-in">
-                                        <p className="text-xs uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-400 font-bold">✓ REGISTRATION COMPLETE</p>
-                                        <p className="text-[10px] uppercase tracking-[0.2em] opacity-80 mt-1">Successfully logged inside registry.</p>
+                                        <p className="text-sm uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-400 font-bold mb-1">✓ Success</p>
+                                        <p className="text-[10px] uppercase tracking-[0.15em] opacity-90 font-medium">You're In! Thank you for subscribing to The Last Chord</p>
                                     </div>
                                 )}
                                 
@@ -470,16 +525,11 @@
                             </form>
                         </div>
 
-                        {/* Secondary Links Block */}
-                        <div className="flex flex-col items-center space-y-6 mt-16 w-full max-w-xs mx-auto text-center">
-                            <div className="group relative w-full">
-                                <a href="https://thelastchord.substack.com" target="_blank" className={`block text-center border-2 ${darkMode ? 'border-[#F5EFE6]' : 'border-[#001F3F]'} w-full py-5 ${darkMode ? 'hover:bg-[#F5EFE6] hover:text-[#121212]' : 'hover:bg-[#001F3F] hover:text-[#D1E2F2]'} transition-all uppercase tracking-[0.4em] text-[10px] font-bold relative z-10`}>Read On Substack</a>
-                                <div className={`absolute top-2 left-2 w-full h-full border ${darkMode ? 'border-[#F5EFE6]/20' : 'border-[#001F3F]/20'} -z-0`}></div>
-                            </div>
-                            
+                        {/* Master vault directory reference button links */}
+                        <div className="mt-12 flex flex-col items-center">
                             <button 
                                 onClick={() => { setViewingCollection(true); setCollectionSubFilter('All'); }}
-                                className="text-[10px] uppercase tracking-[0.3em] font-bold opacity-70 hover:opacity-100 transition-opacity flex items-center space-x-2 mt-4"
+                                className="text-[10px] uppercase tracking-[0.3em] font-bold opacity-70 hover:opacity-100 transition-opacity flex items-center space-x-2"
                             >
                                 <span>Open My Collection</span>
                                 <span className={`text-[9px] px-2 py-0.5 font-bold rounded-full ${darkMode ? 'bg-[#F5EFE6] text-[#121212]' : 'bg-[#001F3F] text-[#D1E2F2]'}`}>{favorites.length}</span>
@@ -541,25 +591,34 @@
                                                     onClick={() => setSelectedCategory(key)}
                                                     onMouseEnter={() => setHoveredCategory(key)}
                                                     onMouseLeave={() => setHoveredCategory(null)}
-                                                    className={`border ${darkMode ? 'border-[#F5EFE6]/20 hover:bg-[#F5EFE6] hover:text-[#121212]' : 'border-[#001F3F]/20 hover:bg-[#001F3F] hover:text-[#E6F0FA]'} p-8 h-56 flex flex-col justify-center items-center text-center cursor-pointer transition-all duration-300 relative group`}
+                                                    className="border border-neutral-400/40 h-56 flex flex-col justify-center items-center text-center cursor-pointer transition-all duration-300 relative group overflow-hidden bg-black text-white"
                                                 >
-                                                    {isHovered ? (
-                                                        <p className="text-xs italic leading-relaxed px-2 font-light tracking-wide animate-fade-in">{cat.desc}</p>
-                                                    ) : (
-                                                        <div className="flex flex-col items-center space-y-3">
-                                                            <span className={`text-[9px] font-bold uppercase tracking-[0.2em] px-3 py-1 rounded-full ${cat.pillBg} ${cat.pillText}`}>
-                                                                {cat.title.split(':')[0]}
-                                                            </span>
-                                                            <h3 className="font-serif text-xl italic tracking-tight">{cat.title.includes(':') ? cat.title.split(':')[1].trim() : cat.title}</h3>
-                                                        </div>
-                                                    )}
+                                                    {/* Background category image cover setup */}
+                                                    <img 
+                                                        src={cat.cover} 
+                                                        alt={cat.title} 
+                                                        className="absolute inset-0 w-full h-full object-cover opacity-40 grayscale group-hover:opacity-10 group-hover:scale-105 transition-all duration-500 z-0" 
+                                                    />
+
+                                                    <div className="relative z-10 p-6 w-full h-full flex flex-col justify-center items-center">
+                                                        {isHovered ? (
+                                                            <p className="text-xs italic leading-relaxed font-light tracking-wide animate-fade-in text-slate-100">{cat.desc}</p>
+                                                        ) : (
+                                                            <div className="flex flex-col items-center space-y-3">
+                                                                <span className={`text-[9px] font-bold uppercase tracking-[0.2em] px-3 py-1 rounded-full ${cat.pillBg} ${cat.pillText}`}>
+                                                                    {cat.title.split(':')[0]}
+                                                                </span>
+                                                                <h3 className="font-serif text-xl italic tracking-tight text-white drop-shadow-sm">{cat.title.includes(':') ? cat.title.split(':')[1].trim() : cat.title}</h3>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             );
                                         })}
 
                                         <div 
                                             onClick={() => setSelectedCategory('All')}
-                                            className={`border border-dashed ${darkMode ? 'border-[#F5EFE6]/40 hover:bg-[#F5EFE6] hover:text-[#121212]' : 'border-[#001F3F]/30 hover:bg-[#001F3F] hover:text-[#E6F0FA]'} p-8 h-56 flex flex-col justify-center items-center text-center cursor-pointer transition-all duration-300 group`}
+                                            className={`border-2 border-dashed ${darkMode ? 'border-[#F5EFE6]/40 hover:bg-[#F5EFE6] hover:text-[#121212]' : 'border-[#001F3F]/30 hover:bg-[#001F3F] hover:text-[#E6F0FA]'} p-8 h-56 flex flex-col justify-center items-center text-center cursor-pointer transition-all duration-300 group`}
                                         >
                                             <h3 className="text-xs uppercase tracking-[0.4em] font-bold">Browse All Articles</h3>
                                         </div>
@@ -586,7 +645,7 @@
                         <div className="w-full px-4 md:px-8 max-w-xl mx-auto mb-8 mt-2 flex flex-col items-center space-y-4 animate-fade-in">
                             <div className="flex items-center space-x-6 text-[10px] uppercase tracking-[0.2em] font-bold">
                                 <span className={`pb-1 border-b ${darkMode ? 'border-[#F5EFE6]' : 'border-[#001F3F]'}`}>
-                                    {activeTab}
+                                    {activeTab === 'New In Tech' ? 'New in Tech' : activeTab}
                                 </span>
                             </div>
 
@@ -644,7 +703,7 @@
                             </button>
 
                             <div className={`text-[9px] uppercase tracking-[0.5em] font-bold px-4 py-1.5 border ${theme.pillBorder} rounded-full hidden sm:block`}>
-                                {viewingCollection ? "Vault" : activeTab}
+                                {viewingCollection ? "Vault" : (activeTab === 'New In Tech' ? 'New in Tech' : activeTab)}
                             </div>
                         </div>
                     </nav>
@@ -658,7 +717,7 @@
                                 onClick={() => { setActiveTab(tab); setViewingCollection(false); }} 
                                 className={(!viewingCollection && activeTab === tab) ? `scale-105 transition-transform border-b ${darkMode ? 'border-[#F5EFE6] text-[#F5EFE6]' : 'border-[#001F3F] text-[#001F3F]'}` : "opacity-30 hover:opacity-100 transition-all"}
                             >
-                                {tab === 'New In Tech' ? 'Tech' : tab}
+                                {tab === 'New In Tech' ? 'New in Tech' : tab}
                             </button>
                         ))}
                     </footer>
@@ -666,7 +725,7 @@
             );
         };
 
-        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+        ReactDOM.createRoot(document.getElementById('root')).render(App);
     </script>
 </body>
 </html>
