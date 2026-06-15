@@ -21,13 +21,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:italic,bold&family=Inter:wght=300;400;700&display=swap" rel="stylesheet">
     
     <style>
-        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; transition: background-color 0.4s ease, color 0.4s ease; }
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; transition: background-color 0.4s ease, color 0.4s ease; overflow-x: hidden; }
         .font-serif { font-family: 'Libre Baskerville', serif; }
         .custom-scroll::-webkit-scrollbar { width: 3px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0, 31, 63, 0.2); border-radius: 10px; }
         .grid-layout { gap: 1px !important; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeInUp 1s ease-out forwards; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeInUp 0.5s ease-out forwards; }
     </style>
 </head>
 <body>
@@ -36,14 +36,8 @@
         const { useState, useEffect, useMemo } = React;
 
         const App = () => {
-            const [activeTab, setActiveTab] = useState(() => {
-                return localStorage.getItem('tlc_active_tab') || 'Home';
-            });
-            
-            const [darkMode, setDarkMode] = useState(() => {
-                return localStorage.getItem('tlc_dark_mode') === 'true';
-            });
-
+            const [activeTab, setActiveTab] = useState(() => localStorage.getItem('tlc_active_tab') || 'Home');
+            const [darkMode, setDarkMode] = useState(() => localStorage.getItem('tlc_dark_mode') === 'true');
             const [favorites, setFavorites] = useState(() => {
                 const cachedData = localStorage.getItem('tlc_favorites_v2');
                 return cachedData ? JSON.parse(cachedData) : [];
@@ -57,10 +51,10 @@
             const [hoveredCategory, setHoveredCategory] = useState(null); 
             const [data, setData] = useState({ Songs: [], London: [], Articles: [], Tech: [] });
 
-            // Collapsible home description states
-            const [showAbout, setShowAbout] = useState(false);
+            // Interactive Info Modal Overlay state
+            const [showAboutModal, setShowAboutModal] = useState(false);
 
-            // Form Data State
+            // Subscriber Form State
             const [formData, setFormData] = useState({ firstName: '', lastName: '', citySelection: 'London', customCity: '', email: '' });
             const [signupStatus, setSignupStatus] = useState('idle'); 
 
@@ -77,7 +71,7 @@
                 "The Last Chord": {
                     title: "The Last Chord",
                     pillBg: "bg-[#DDEBFA]", pillText: "text-[#1E40AF]",
-                    desc: "Welcome to The Last Chord. Read about us here.",
+                    desc: "Welcome to The Last Chord. Read about our journey here.",
                     cover: "https://trishrai.github.io/thelastchord/Logo.jpeg"
                 },
                 "Off The Record: Opinion Pieces": {
@@ -307,14 +301,26 @@
                             
                             <div className="mt-auto flex flex-col space-y-2">
                                 {finalLink && (
-                                    <a href={finalLink} target="_blank" className={`border ${darkMode ? 'border-[#121212]' : 'border-[#E6F0FA]'} hover:bg-transparent ${darkMode ? 'hover:text-[#121212] bg-[#121212] text-[#F5EFE6]' : 'hover:text-[#001F3F] bg-[#001F3F] text-[#E6F0FA]'} py-4 text-[9px] uppercase tracking-[0.4em] font-bold text-center transition-all`}>
+                                    <a 
+                                        href={finalLink} 
+                                        target="_blank" 
+                                        className={`border py-4 text-[9px] uppercase tracking-[0.4em] font-bold text-center transition-all ${
+                                            darkMode 
+                                                ? 'bg-[#121212] text-[#F5EFE6] border-[#121212] hover:bg-[#F5EFE6] hover:text-[#121212]' 
+                                                : 'bg-[#001F3F] text-[#E6F0FA] border-[#001F3F] hover:bg-white hover:text-[#001F3F]'
+                                        }`}
+                                    >
                                         {originTab === 'Songs' ? "Listen on Spotify" : originTab === 'Articles' ? "Read Publication" : "Website"}
                                     </a>
                                 )}
                                 
                                 <button 
                                     onClick={() => toggleFavorite(item, originTab)}
-                                    className={`border ${darkMode ? 'border-[#121212]/30 hover:bg-[#121212] hover:text-[#F5EFE6]' : 'border-[#E6F0FA]/30 hover:bg-[#E6F0FA] hover:text-[#001F3F]'} py-2 text-[8px] uppercase tracking-[0.3em] font-bold text-center transition-all`}
+                                    className={`border py-2 text-[8px] uppercase tracking-[0.3em] font-bold text-center transition-all ${
+                                        darkMode
+                                            ? 'border-[#121212]/30 text-[#121212]/80 hover:bg-[#121212] hover:text-[#F5EFE6]'
+                                            : 'border-[#E6F0FA]/30 text-[#E6F0FA]/80 hover:bg-[#E6F0FA] hover:text-[#001F3F]'
+                                    }`}
                                 >
                                     {saved ? "✕ Remove from Collection" : "✓ Save to Collection"}
                                 </button>
@@ -373,92 +379,71 @@
                 }
 
                 if (activeTab === 'Home') return (
-                    <div className="w-full max-w-3xl mx-auto px-6 py-12 md:py-20 flex flex-col text-center items-center animate-fade-in pb-40">
-                        {/* Title Block */}
-                        <div className="mb-6">
-                             <h1 className="text-5xl md:text-6xl font-serif italic tracking-tighter leading-none">THE LAST CHORD</h1>
-                             <p className="text-[10px] uppercase tracking-[0.5em] font-bold opacity-60 mt-4 mb-3">BY TRISHA RAI | EST. 2025</p>
-                             <a href="https://thelastchord.substack.com" target="_blank" className="text-xs uppercase font-bold tracking-widest underline hover:opacity-70 transition-opacity">Read on Substack</a>
+                    <div className="w-full max-w-2xl mx-auto px-6 flex flex-col text-center items-center justify-center h-[calc(100vh-180px)] min-h-[480px] animate-fade-in overflow-hidden relative">
+                        {/* Title Block - Shifted higher up with minimized top margins */}
+                        <div className="mb-2 mt-0">
+                             <h1 className="text-5xl md:text-6xl font-serif italic tracking-tighter leading-none">The Last Chord</h1>
+                             <p className="text-[10px] uppercase tracking-[0.5em] font-bold opacity-60 mt-2 mb-2">BY TRISHA RAI | EST. 2025</p>
+                             <a href="https://thelastchord.substack.com" target="_blank" className="text-[10px] uppercase font-bold tracking-widest underline hover:opacity-70 transition-opacity">Read on Substack</a>
                         </div>
                         
-                        {/* Clickable Image Logo & Prompt Link */}
-                        <div className="my-8 flex flex-col items-center space-y-4">
-                            <button onClick={() => setShowAbout(!showAbout)} className="focus:outline-none group transform hover:scale-[1.02] transition-transform duration-300">
-                                <img src="https://trishrai.github.io/thelastchord/Logo.jpeg" alt="The Last Chord Logo" className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-2 border-current shadow-md grayscale group-hover:grayscale-0 transition-all duration-500" />
-                            </button>
-                            <button onClick={() => setShowAbout(!showAbout)} className="text-[11px] uppercase tracking-[0.3em] font-bold border-b border-current pb-0.5 hover:opacity-70 transition-all">
-                                {showAbout ? "Click here to hide overview ▲" : "Click here to read about the last chord ▼"}
+                        {/* Native Colored Interactive App Logo & Tooltip Prompt */}
+                        <div className="my-3 flex flex-col items-center relative group">
+                            <button 
+                                onClick={() => setShowAboutModal(true)} 
+                                className="focus:outline-none transform hover:scale-105 transition-all duration-300 relative rounded-full p-0.5 border border-current"
+                            >
+                                <img 
+                                    src="https://trishrai.github.io/thelastchord/Logo.jpeg" 
+                                    alt="The Last Chord Logo" 
+                                    className="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover shadow-sm transition-all" 
+                                />
+                                {/* Floating Label Indicator on Hover */}
+                                <div className={`absolute -bottom-2 left-1/2 -translate-x-1/2 text-[8px] uppercase tracking-widest font-bold px-2 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap shadow-sm border ${darkMode ? 'bg-[#1C1C1E] text-[#F5EFE6] border-[#F5EFE6]/30' : 'bg-white text-[#001F3F] border-[#001F3F]/30'}`}>
+                                    Click To Read
+                                </div>
                             </button>
                         </div>
 
-                        {/* Interactive Collapsible Copy Block */}
-                        {showAbout && (
-                            <div className="space-y-12 my-8 text-left text-sm md:text-base leading-relaxed font-light opacity-95 animate-fade-in max-w-2xl w-full">
-                                <section className="border-l-2 border-current pl-6">
-                                    <h2 className="text-xl md:text-2xl font-serif italic mb-4">About The Last Chord</h2>
-                                    <p className="opacity-90">
-                                        Launched in February 2025 by Founder Trisha Rai, The Last Chord is an online digital platform celebrating, exploring, and analysing the intersection between technology and culture. From in-depth insights into London's vibrant arts, culture, and music scene to critical think pieces about the evolution of artificial intelligence and its impacts on society, The Last Chord promises intellectual conversations, nuanced debates, and a holistic understanding of all sides of the coin.
-                                    </p>
-                                </section>
-
-                                <section className={`p-8 border ${darkMode ? 'border-[#F5EFE6]/20 bg-[#F5EFE6]/5' : 'border-[#001F3F]/20 bg-white/40'}`}>
-                                    <h2 className="text-xl md:text-2xl font-serif italic mb-4">About the Founder</h2>
-                                    <p className="opacity-90 mb-4">
-                                        Founded by Trisha Rai, The Last Chord is a platform dedicated to exploring the intersection of technology, culture, and our daily lives. Rai was born in India and raised in Hong Kong before moving to London in 2020 to pursue her undergraduate studies at the London School of Economics and Political Science. It was during this time that Rai became captivated by the profound ways technology shapes everyday experiences.
-                                    </p>
-                                    <p className="opacity-90 mb-4">
-                                        Driven by a desire to bridge the gap between complex digital shifts and human-centric storytelling, Rai founded The Last Chord in 2025. Whether dissecting the latest pop culture phenomena or analysing the implications of emerging AI policies, every piece on the site is researched, developed, edited, and written by Rai.
-                                    </p>
-                                    <p className="opacity-90">
-                                        Currently, Rai is pursuing a Master’s in Digital Humanities at University College London, where her research focuses on the evolving relationship between technology, culture, and artificial intelligence. Rai continues to run, edit, and write for The Last Chord full-time, building a space for thoughtful discussion and debate on the things that matter most. This entire web app has been personally coded, built, and developed by Rai.
-                                    </p>
-                                </section>
-                            </div>
-                        )}
-
-                        {/* High Contrast Registration Box */}
-                        <div className={`p-8 border-2 ${darkMode ? 'border-[#F5EFE6] bg-[#1C1C1E]' : 'border-[#001F3F] bg-white'} w-full max-w-lg mt-8 text-left`}>
-                            <h3 className="text-xs uppercase tracking-[0.3em] font-bold mb-6 opacity-80 text-center md:text-left">Sign up to the last chord registry</h3>
+                        {/* Streamlined Registration Box */}
+                        <div className={`p-5 border-2 ${darkMode ? 'border-[#F5EFE6] bg-[#1C1C1E]' : 'border-[#001F3F] bg-white'} w-full max-w-md mt-2 text-left shadow-sm z-10`}>
+                            <h3 className="text-[9px] uppercase tracking-[0.3em] font-bold mb-4 opacity-80 text-center">Subscribe To The Last Chord</h3>
                             
-                            <form onSubmit={handleSubscribe} className="flex flex-col space-y-5">
+                            <form onSubmit={handleSubscribe} className="flex flex-col space-y-4">
                                 {signupStatus !== 'success' ? (
                                     <>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="flex flex-col">
-                                                <input 
-                                                    type="text"
-                                                    name="firstName"
-                                                    required
-                                                    placeholder="FIRST NAME"
-                                                    disabled={signupStatus === 'loading'}
-                                                    value={formData.firstName}
-                                                    onChange={handleFormChange}
-                                                    className={`w-full bg-transparent border-b-2 ${darkMode ? 'border-[#F5EFE6] text-[#F5EFE6]' : 'border-[#001F3F] text-[#001F3F]'}' py-2 text-[11px] uppercase tracking-[0.2em] font-bold outline-none placeholder:text-current placeholder:opacity-50`}
-                                                />
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <input 
-                                                    type="text"
-                                                    name="lastName"
-                                                    required
-                                                    placeholder="LAST NAME"
-                                                    disabled={signupStatus === 'loading'}
-                                                    value={formData.lastName}
-                                                    onChange={handleFormChange}
-                                                    className={`w-full bg-transparent border-b-2 ${darkMode ? 'border-[#F5EFE6] text-[#F5EFE6]' : 'border-[#001F3F] text-[#001F3F]'}' py-2 text-[11px] uppercase tracking-[0.2em] font-bold outline-none placeholder:text-current placeholder:opacity-50`}
-                                                />
-                                            </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <input 
+                                                type="text"
+                                                name="firstName"
+                                                required
+                                                placeholder="FIRST NAME"
+                                                disabled={signupStatus === 'loading'}
+                                                value={formData.firstName}
+                                                onChange={handleFormChange}
+                                                className={`w-full bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/60 text-[#F5EFE6] focus:border-[#F5EFE6]' : 'border-[#001F3F]/40 text-[#001F3F] focus:border-[#001F3F]'} py-1 text-[10px] uppercase tracking-[0.15em] font-bold outline-none placeholder:text-current placeholder:opacity-40`}
+                                            />
+                                            <input 
+                                                type="text"
+                                                name="lastName"
+                                                required
+                                                placeholder="LAST NAME"
+                                                disabled={signupStatus === 'loading'}
+                                                value={formData.lastName}
+                                                onChange={handleFormChange}
+                                                className={`w-full bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/60 text-[#F5EFE6] focus:border-[#F5EFE6]' : 'border-[#001F3F]/40 text-[#001F3F] focus:border-[#001F3F]'} py-1 text-[10px] uppercase tracking-[0.15em] font-bold outline-none placeholder:text-current placeholder:opacity-40`}
+                                            />
                                         </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
                                             <div className="flex flex-col md:col-span-1">
-                                                <label className="text-[8px] uppercase tracking-widest font-bold mb-1 opacity-70">Select City</label>
+                                                <label className="text-[7px] uppercase tracking-widest font-bold mb-0.5 opacity-60">Select City</label>
                                                 <select 
                                                     name="citySelection"
                                                     disabled={signupStatus === 'loading'}
                                                     value={formData.citySelection}
                                                     onChange={handleFormChange}
-                                                    className={`w-full bg-transparent border-b-2 ${darkMode ? 'border-[#F5EFE6] text-[#F5EFE6] bg-[#1C1C1E]' : 'border-[#001F3F] text-[#001F3F] bg-white'} py-1.5 text-[11px] uppercase tracking-[0.15em] font-bold outline-none rounded-none cursor-pointer`}
+                                                    className={`w-full bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/60 text-[#F5EFE6] bg-[#1C1C1E]' : 'border-[#001F3F]/40 text-[#001F3F] bg-white'} py-1 text-[10px] uppercase tracking-[0.1em] font-bold outline-none rounded-none cursor-pointer`}
                                                 >
                                                     <option value="London">London</option>
                                                     <option value="Hong Kong">Hong Kong</option>
@@ -470,11 +455,11 @@
                                                     <option value="Mumbai">Mumbai</option>
                                                     <option value="Singapore">Singapore</option>
                                                     <option value="Los Angeles">Los Angeles</option>
-                                                    <option value="Other">Other (Please Specify)</option>
+                                                    <option value="Other">Other...</option>
                                                 </select>
                                             </div>
 
-                                            <div className="flex flex-col md:col-span-2 justify-end">
+                                            <div className="flex flex-col md:col-span-2">
                                                 <input 
                                                     type="email"
                                                     name="email"
@@ -483,13 +468,13 @@
                                                     disabled={signupStatus === 'loading'}
                                                     value={formData.email}
                                                     onChange={handleFormChange}
-                                                    className={`w-full bg-transparent border-b-2 ${darkMode ? 'border-[#F5EFE6] text-[#F5EFE6]' : 'border-[#001F3F] text-[#001F3F]'} py-2 text-[11px] uppercase tracking-[0.2em] font-bold outline-none placeholder:text-current placeholder:opacity-50`}
+                                                    className={`w-full bg-transparent border-b ${darkMode ? 'border-[#F5EFE6]/60 text-[#F5EFE6] focus:border-[#F5EFE6]' : 'border-[#001F3F]/40 text-[#001F3F] focus:border-[#001F3F]'} py-1 text-[10px] uppercase tracking-[0.15em] font-bold outline-none placeholder:text-current placeholder:opacity-40`}
                                                 />
                                             </div>
                                         </div>
 
                                         {formData.citySelection === 'Other' && (
-                                            <div className="flex flex-col pt-2 animate-fade-in">
+                                            <div className="flex flex-col animate-fade-in">
                                                 <input 
                                                     type="text"
                                                     name="customCity"
@@ -498,7 +483,7 @@
                                                     disabled={signupStatus === 'loading'}
                                                     value={formData.customCity}
                                                     onChange={handleFormChange}
-                                                    className={`w-full bg-transparent border-b-2 ${darkMode ? 'border-rose-400 text-rose-400' : 'border-rose-700 text-rose-700'} py-2 text-[11px] uppercase tracking-[0.2em] font-bold outline-none placeholder:text-current placeholder:opacity-60`}
+                                                    className={`w-full bg-transparent border-b ${darkMode ? 'border-rose-400 text-rose-400' : 'border-rose-700 text-rose-700'} py-1 text-[10px] uppercase tracking-[0.15em] font-bold outline-none placeholder:text-current placeholder:opacity-60`}
                                                 />
                                             </div>
                                         )}
@@ -506,32 +491,51 @@
                                         <button 
                                             type="submit" 
                                             disabled={signupStatus === 'loading'}
-                                            className={`text-[10px] uppercase tracking-[0.4em] font-bold py-4 border-2 transition-all text-center mt-4 ${darkMode ? 'border-[#F5EFE6] bg-[#F5EFE6] text-[#121212] hover:bg-transparent hover:text-[#F5EFE6]' : 'border-[#001F3F] bg-[#001F3F] text-white hover:bg-transparent hover:text-[#001F3F]'}`}
+                                            className={`text-[9px] uppercase tracking-[0.3em] font-bold py-2.5 border transition-all text-center mt-2 ${darkMode ? 'border-[#F5EFE6] bg-[#F5EFE6] text-[#121212] hover:bg-transparent hover:text-[#F5EFE6]' : 'border-[#001F3F] bg-[#001F3F] text-white hover:bg-transparent hover:text-[#001F3F]'}`}
                                         >
-                                            {signupStatus === 'loading' ? 'LOADING...' : 'SUBSCRIBE TO THE LAST CHORD →'}
+                                            {signupStatus === 'loading' ? 'LOADING...' : 'Subscribe →'}
                                         </button>
                                     </>
                                 ) : (
-                                    <div className="py-6 text-center animate-fade-in">
-                                        <p className="text-sm uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-400 font-bold mb-1">✓ Success</p>
-                                        <p className="text-[10px] uppercase tracking-[0.15em] opacity-90 font-medium">You're In! Thank you for subscribing to The Last Chord</p>
+                                    <div className="py-4 text-center animate-fade-in">
+                                        <p className="text-xs uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-400 font-bold mb-0.5">✓ Success</p>
+                                        <p className="text-[9px] uppercase tracking-[0.15em] opacity-90 font-medium">Thank you for subscribing to The Last Chord</p>
                                     </div>
                                 )}
                                 
-                                {signupStatus === 'error' && <p className="text-[10px] uppercase tracking-[0.3em] text-rose-600 dark:text-rose-400 font-bold text-center">Failed connection. Please retry.</p>}
+                                {signupStatus === 'error' && <p className="text-[9px] uppercase tracking-[0.2em] text-rose-600 dark:text-rose-400 font-bold text-center">Failed connection. Please retry.</p>}
                             </form>
                         </div>
 
-                        {/* Master vault directory reference button links */}
-                        <div className="mt-12 flex flex-col items-center">
-                            <button 
-                                onClick={() => { setViewingCollection(true); setCollectionSubFilter('All'); }}
-                                className="text-[10px] uppercase tracking-[0.3em] font-bold opacity-70 hover:opacity-100 transition-opacity flex items-center space-x-2"
-                            >
-                                <span>Open My Collection</span>
-                                <span className={`text-[9px] px-2 py-0.5 font-bold rounded-full ${darkMode ? 'bg-[#F5EFE6] text-[#121212]' : 'bg-[#001F3F] text-[#D1E2F2]'}`}>{favorites.length}</span>
-                            </button>
-                        </div>
+                        {/* Interactive Info Modal Overlay Block */}
+                        {showAboutModal && (
+                            <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+                                <div className={`w-full max-w-xl p-8 border ${darkMode ? 'bg-[#1C1C1E] border-[#F5EFE6]/20 text-[#F5EFE6]' : 'bg-white border-[#001F3F]/20 text-[#001F3F]'} relative shadow-2xl max-h-[85vh] overflow-y-auto custom-scroll`}>
+                                    <button 
+                                        onClick={() => setShowAboutModal(false)}
+                                        className="absolute top-4 right-4 text-xs font-bold uppercase tracking-widest opacity-60 hover:opacity-100 transition-opacity"
+                                    >
+                                        ✕ Close
+                                    </button>
+                                    
+                                    <h2 className="text-2xl font-serif italic mb-6 pb-2 border-b border-current/20">About The Last Chord</h2>
+                                    <div className="space-y-4 text-xs md:text-sm leading-relaxed font-light text-left opacity-95">
+                                        <p>
+                                            Founded by Trisha Rai, The Last Chord is a platform dedicated to exploring the intersection between technology, culture, and our daily lives. Rai was born in India and raised in Hong Kong before moving to London in 2020 to pursue her undergraduate studies at the London School of Economics and Political Science. It was during this time that Rai became captivated by the profound ways technology shapes everyday experiences.
+                                        </p>
+                                        <p>
+                                            Driven by a desire to bridge the gap between complex digital shifts and human-centric storytelling, Rai founded The Last Chord in 2025. Whether dissecting the latest pop culture phenomena or analysing the implications of emerging AI policies, every piece on the site is researched, developed, edited, and written by Rai.
+                                        </p>
+                                        <p>
+                                            Currently, Rai is pursuing a Master’s in Digital Humanities at University College London, where her research focuses on the evolving relationship between technology, culture, and artificial intelligence. Rai continues to run, edit, and write for The Last Chord full-time, building a space for thoughtful discussion and debate on the things that matter most.
+                                        </p>
+                                        <p className="pt-2 font-medium border-t border-current/10">
+                                            This entire web app, from interface to logic, has been personally coded, built, and developed by Trisha Rai.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 );
 
@@ -588,23 +592,22 @@
                                                     onClick={() => setSelectedCategory(key)}
                                                     onMouseEnter={() => setHoveredCategory(key)}
                                                     onMouseLeave={() => setHoveredCategory(null)}
-                                                    className="border border-neutral-400/40 h-56 flex flex-col justify-center items-center text-center cursor-pointer transition-all duration-300 relative group overflow-hidden bg-black text-white"
+                                                    className="border border-neutral-400/40 h-56 flex flex-col justify-center items-center text-center cursor-pointer transition-all duration-300 relative group overflow-hidden bg-[#0a0f1d] text-white"
                                                 >
                                                     <img 
                                                         src={cat.cover} 
                                                         alt={cat.title} 
-                                                        className="absolute inset-0 w-full h-full object-cover opacity-40 grayscale group-hover:opacity-10 group-hover:scale-105 transition-all duration-500 z-0" 
+                                                        className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale group-hover:opacity-10 group-hover:scale-105 transition-all duration-500 z-0" 
                                                     />
 
                                                     <div className="relative z-10 p-6 w-full h-full flex flex-col justify-center items-center">
                                                         {isHovered ? (
-                                                            <p className="text-xs italic leading-relaxed font-light tracking-wide animate-fade-in text-slate-100">{cat.desc}</p>
+                                                            <p className="text-xs italic leading-relaxed font-light tracking-wide animate-fade-in text-slate-200">{cat.desc}</p>
                                                         ) : (
-                                                            <div className="flex flex-col items-center space-y-3">
-                                                                <span className={`text-[9px] font-bold uppercase tracking-[0.2em] px-3 py-1 rounded-full ${cat.pillBg} ${cat.pillText}`}>
-                                                                    {cat.title.split(':')[0]}
+                                                            <div className="flex flex-col items-center justify-center">
+                                                                <span className={`text-[10px] font-bold uppercase tracking-[0.25em] px-4 py-2 rounded-md shadow-sm text-center ${cat.pillBg} ${cat.pillText}`}>
+                                                                    {cat.title}
                                                                 </span>
-                                                                <h3 className="font-serif text-xl italic tracking-tight text-white drop-shadow-sm">{cat.title.includes(':') ? cat.title.split(':')[1].trim() : cat.title}</h3>
                                                             </div>
                                                         )}
                                                     </div>
