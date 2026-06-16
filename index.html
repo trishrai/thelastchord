@@ -67,13 +67,13 @@
             const [formData, setFormData] = useState({ firstName: '', lastName: '', citySelection: 'London', customCity: '', email: '' });
             const [signupStatus, setSignupStatus] = useState('idle'); 
 
-            const NEWSLETTER_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwd1mN9KoMgOK0gjAYKGuBXzdycjybbJFiOxgnSsIjIxsNx8oGNIJTpFKQ2bcup08JpLg/exec";
+            const NEWSLETTER_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzSZ6k73EZK0T7xuCalKSFQ61ztl3LYBdAcxr_ZtYSDoFTAFaHAVrJygjvG1-K1SRqZ3w/exec";
 
             const CSV_LINKS = {
-                Songs: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=0&single=true&output=csv",
-                London: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1791301794&single=true&output=csv",
-                Articles: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=116420010&single=true&output=csv",
-                Tech: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1956240315&single=true&output=csv"
+                Songs: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=0&single=true&output=csv",
+                London: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1791301794&single=true&output=csv",
+                Articles: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=116420010&single=true&output=csv",
+                Tech: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1956240315&single=true&output=csv"
             };
 
             const CATEGORY_MAP = {
