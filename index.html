@@ -128,8 +128,38 @@
             }, [favorites]);
 
             useEffect(() => {
-                Object.keys(CSV_LINKS).forEach(key => {
-                    Papa.parse(CSV_LINKS[key], {
+    Object.keys(CSV_LINKS).forEach(key => {
+        Papa.parse(CSV_LINKS[key], {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+
+            error: (err) => {
+                console.error(`CSV load failed for ${key}:`, err);
+            },
+
+            complete: (results) => {
+                try {
+                    const cleanData = (results.data || []).map(row => {
+                        const newRow = {};
+                        Object.keys(row || {}).forEach(k => {
+                            newRow[k?.toLowerCase()?.trim?.() || k] = row[k];
+                        });
+                        return newRow;
+                    });
+
+                    setData(prev => ({
+                        ...prev,
+                        [key]: cleanData.reverse()
+                    }));
+                } catch (e) {
+                    console.error(`Parsing crash in ${key}:`, e);
+                }
+            }
+        });
+    });
+}, []);
+            
     download: true,
     header: true,
     skipEmptyLines: true,
@@ -757,26 +787,9 @@
             );
         };
 
-        ReactDOM.render(<App />, document.getElementById('root'));
-    </script>
-    <script type="text/babel">
-const { useState, useEffect, useMemo } = React;
-
-const App = () => {
-    // (your entire App stays unchanged)
-};
-
-window.addEventListener("DOMContentLoaded", () => {
-    const rootElement = document.getElementById("root");
-
-    if (!rootElement) {
-        console.error("Root div not found");
-        return;
-    }
-
-    const root = ReactDOM.createRoot(rootElement);
-    root.render(<App />);
-});
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+        
 </script>
 </body>
 </html>
