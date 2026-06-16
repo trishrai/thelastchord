@@ -12,9 +12,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="The Last Chord">
-    
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
@@ -34,32 +34,15 @@
 </head>
 <body>
     <div id="root"></div>
-    <script type="text/babel" data-presets="react">
+    <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
         const App = () => {
-            const [activeTab, setActiveTab] = useState(() => {
-                try {
-                    return localStorage.getItem('tlc_active_tab') || 'Home';
-                } catch {
-                    return 'Home';
-                }
-            });
-
-            const [darkMode, setDarkMode] = useState(() => {
-                try {
-                    return localStorage.getItem('tlc_dark_mode') === 'true';
-                } catch {
-                    return false;
-                }
-            });
+            const [activeTab, setActiveTab] = useState(() => localStorage.getItem('tlc_active_tab') || 'Home');
+            const [darkMode, setDarkMode] = useState(() => localStorage.getItem('tlc_dark_mode') === 'true');
             const [favorites, setFavorites] = useState(() => {
-                try {
-                    const cachedData = localStorage.getItem('tlc_favorites_v2');
-                    return cachedData ? JSON.parse(cachedData) : [];
-                } catch {
-                    return [];
-                }
+                const cachedData = localStorage.getItem('tlc_favorites_v2');
+                return cachedData ? JSON.parse(cachedData) : [];
             });
 
             const [searchQuery, setSearchQuery] = useState('');
@@ -78,10 +61,10 @@
             const NEWSLETTER_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwd1mN9KoMgOK0gjAYKGuBXzdycjybbJFiOxgnSsIjIxsNx8oGNIJTpFKQ2bcup08JpLg/exec";
 
             const CSV_LINKS = {
-                Songs: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=0&single=true&output=csv",
-                London: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1791301794&single=true&output=csv",
-                Articles: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=116420010&single=true&output=csv",
-                Tech: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1956240315&single=true&output=csv"
+                Songs: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=0&single=true&output=csv",
+                London: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1791301794&single=true&output=csv",
+                Articles: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=116420010&single=true&output=csv",
+                Tech: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqo5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1956240315&single=true&output=csv"
             };
 
             const CATEGORY_MAP = {
@@ -95,88 +78,58 @@
                     title: "Off The Record: Opinion Pieces",
                     pillBg: "bg-[#E2F0D9]", pillText: "text-[#2E7D32]",
                     desc: "Welcome to Off the Record, where art meets insight. We offer sharp, unfiltered opinion pieces on cultural shifts, the evolution of sound, and the timeless debates shaping the industry.",
-                    cover: "https://github.com/trishrai/thelastchord/blob/main/opinions.jpeg?raw=true"
+                    cover: "https://trishrai.github.io/thelastchord/opinions.jpeg"
                 },
                 "The Sonic Lens: Analysis": {
                     title: "The Sonic Lens: Analysis",
                     pillBg: "bg-[#F3E5F5]", pillText: "text-[#6A1B9A]",
                     desc: "Welcome to The Sonic Lens. We examine the intersection of art, culture, and society through a critical eye. From the evolution of musical traditions to the impact of iconic movements, we offer thought-provoking analysis on how art shapes our world.",
-                    cover: "https://github.com/trishrai/thelastchord/blob/main/analysis.jpeg?raw=true"
+                    cover: "https://trishrai.github.io/thelastchord/analysis.jpeg"
                 },
                 "Studio Sessions: Interviews": {
                     title: "Studio Sessions: Interviews",
                     pillBg: "bg-[#E0F2F1]", pillText: "text-[#00695C]",
                     desc: "Welcome to Studio Sessions, where creativity meets conversation. We interview musicians, writers, and visual creators to uncover the stories behind their art. Dive deep into the processes, struggles, and passions that drive the creative world.",
-                    cover: "https://github.com/trishrai/thelastchord/blob/main/Interviews.jpeg?raw=true"
+                    cover: "https://trishrai.github.io/thelastchord/interviews.jpeg"
                 },
                 "Soundcheck: Reviews": {
                     title: "Soundcheck: Reviews",
                     pillBg: "bg-[#FCE4EC]", pillText: "text-[#C2185B]",
                     desc: "Welcome to Soundcheck, the reviews section of The Last Chord. We cover albums, films, art, and culture that leave a mark. Beyond simple critiques, we unpack the storytelling, rebellion, and raw emotion behind every piece.",
-                    cover: "https://github.com/trishrai/thelastchord/blob/main/reviews.jpeg?raw=true"
+                    cover: "https://trishrai.github.io/thelastchord/soundcheck.jpeg"
                 }
             };
 
-            // 1 – activeTab (keep the extra logic inside)
             useEffect(() => {
-                try {
-                    localStorage.setItem('tlc_active_tab', activeTab);
-                } catch {}
-                setSearchQuery('');
+                localStorage.setItem('tlc_active_tab', activeTab);
+                setSearchQuery(''); 
                 if (activeTab === 'Articles') {
-                    setSelectedCategory('Landing');
+                    setSelectedCategory('Landing'); 
                 }
             }, [activeTab]);
 
-            // 2 – darkMode
             useEffect(() => {
-                try {
-                    localStorage.setItem('tlc_dark_mode', darkMode);
-                } catch {}
+                localStorage.setItem('tlc_dark_mode', darkMode);
             }, [darkMode]);
 
-            // 3 – favorites
             useEffect(() => {
-                try {
-                    localStorage.setItem('tlc_favorites_v2', JSON.stringify(favorites));
-                } catch {}
+                localStorage.setItem('tlc_favorites_v2', JSON.stringify(favorites));
             }, [favorites]);
 
-            // 4 – CSV loading – FIXED: guard against missing Papa and catch errors
             useEffect(() => {
-                if (typeof Papa === 'undefined') {
-                    console.warn('PapaParse not loaded – skipping CSV fetch');
-                    return;
-                }
-
-                try {
-                    Object.keys(CSV_LINKS).forEach(key => {
-                        Papa.parse(CSV_LINKS[key], {
-                            download: true,
-                            header: true,
-                            skipEmptyLines: true,
-                            complete: (results) => {
-                                try {
-                                    const cleanData = results.data.map(row => {
-                                        const newRow = {};
-                                        Object.keys(row).forEach(k => {
-                                            newRow[k.toLowerCase().trim()] = row[k];
-                                        });
-                                        return newRow;
-                                    });
-                                    setData(prev => ({ ...prev, [key]: cleanData.reverse() }));
-                                } catch (err) {
-                                    console.error(`Error processing ${key} data:`, err);
-                                }
-                            },
-                            error: (err) => {
-                                console.error(`CSV download error for ${key}:`, err);
-                            }
-                        });
+                Object.keys(CSV_LINKS).forEach(key => {
+                    Papa.parse(CSV_LINKS[key], {
+                        download: true, header: true, skipEmptyLines: true,
+                        complete: (results) => {
+                            const cleanData = results.data.map(row => {
+                                const newRow = {};
+                                Object.keys(row).forEach(k => { newRow[k.toLowerCase().trim()] = row[k]; });
+                                return newRow;
+                            });
+                            setData(prev => ({ ...prev, [key]: cleanData.reverse() }));
+                        }
                     });
-                } catch (err) {
-                    console.error('CSV loading error:', err);
-                }
+                });
             }, []);
 
             const theme = {
@@ -331,6 +284,7 @@
                             <div className="flex justify-between items-start">
                                 <div className="w-full">
                                     <h3 className="font-serif text-3xl italic mb-2 pr-4">{title}</h3>
+                                    {/* Subtitle / Metadata details made larger */}
                                     <p className={`text-[12px] uppercase tracking-widest font-bold opacity-70 mb-4 border-b ${darkMode ? 'border-[#121212]/20' : 'border-[#E6F0FA]/20'} pb-3`}>
                                         {sub}
                                     </p>
@@ -338,6 +292,7 @@
                                 <span className="text-[8px] uppercase tracking-widest border border-current px-2.5 py-0.5 rounded opacity-50 shrink-0">{originTab === 'New In Tech' ? 'Tech' : originTab}</span>
                             </div>
                             
+                            {/* Metadata fields (Album, Year, Location) bumped up in font scale */}
                             <div className="mb-5 space-y-1.5 text-[12px] uppercase tracking-[0.15em] opacity-80 italic font-medium">
                                 {album && <p>Album: {album}</p>}
                                 {year && <p>Released: {year}</p>}
@@ -402,8 +357,7 @@
                                         <option value="Songs">Songs</option>
                                         <option value="Articles">Articles</option>
                                         <option value="London">London</option>
-                                        {/* FIXED: changed from "News in Tech" to "New in Tech" */}
-                                        <option value="New in Tech">New in Tech</option>
+                                        <option value="News in Tech">New in Tech</option>
                                     </select>
                                 </div>
 
@@ -450,6 +404,7 @@
                                     alt="The Last Chord Logo" 
                                     className="w-28 h-28 md:w-32 md:h-32 rounded-full object-cover shadow-sm transition-all" 
                                 />
+                                {/* Overlay Tooltip */}
                                 <div className={`absolute -bottom-2 left-1/2 -translate-x-1/2 text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap shadow-sm border ${darkMode ? 'bg-[#1C1C1E] text-[#F5EFE6] border-[#F5EFE6]/30' : 'bg-white text-[#001F3F] border-[#001F3F]/30'}`}>
                                     Click To Read
                                 </div>
@@ -457,6 +412,7 @@
                             <p className="text-[9px] uppercase tracking-[0.25em] font-bold opacity-40 mt-4">↑ Click To Read</p>
                         </div>
 
+                        {/* In-Line Expandable Content Block */}
                         {showAboutSection && (
                             <div className={`w-full max-w-2xl my-5 p-8 border text-left animate-fade-in shadow-sm ${darkMode ? 'bg-[#1C1C1E] border-[#F5EFE6]/20 text-[#F5EFE6]' : 'bg-white border-[#001F3F]/20 text-[#001F3F]'}`}>
                                 <div className="flex justify-between items-center mb-5 pb-2 border-b border-current/10">
@@ -774,40 +730,8 @@
             );
         };
 
-        const rootEl = document.getElementById('root');
-
-try {
-    if (!rootEl) {
-        throw new Error("Root element not found");
-    }
-
-    ReactDOM.render(<App />, rootEl);
-
-} catch (err) {
-    console.error("We're editing the app right now. Please try visiting us again later!", err);
-
-    rootEl.innerHTML = `
-        <div style="padding:20px;font-family:Arial;color:red">
-            <h2>Something broke while loading the site</h2>
-            <pre>${err.message}</pre>
-        </div>
-    `;
-}
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
-    <script>
-window.addEventListener('error', (e) => {
-    console.error("Global error:", e.error);
-
-    const root = document.getElementById('root');
-    if (root && !root.innerHTML.trim()) {
-        root.innerHTML = `
-            <div style="padding:20px;font-family:Arial;color:red">
-                <h2>Runtime Error</h2>
-                <pre>${e.message}</pre>
-            </div>
-        `;
-    }
-});
-</script>
 </body>
 </html>
