@@ -36,7 +36,10 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo } = React;
+        // Explicit destructuring directly from global namespace to keep Babel happy
+        const useState = window.React.useState;
+        const useEffect = window.React.useEffect;
+        const useMemo = window.React.useMemo;
 
         const App = () => {
             const [activeTab, setActiveTab] = useState(() => {
@@ -126,7 +129,7 @@
             useEffect(() => {
                 Object.keys(CSV_LINKS).forEach(key => {
                     if (window.Papa) {
-                        Papa.parse(CSV_LINKS[key], {
+                        window.Papa.parse(CSV_LINKS[key], {
                             download: true, header: true, skipEmptyLines: true,
                             complete: (results) => {
                                 const cleanData = results.data.map(row => {
@@ -136,7 +139,7 @@
                                 });
                                 setData(prev => ({ ...prev, [key]: cleanData.reverse() }));
                             },
-                            error: (err) => console.warn(`CSV loading error for ${key}:`, err)
+                            error: (err) => console.warn(`CSV setup check background warning:`, err)
                         });
                     }
                 });
@@ -738,8 +741,8 @@
             );
         };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        // Explicitly paint onto root context via Global Window reference
+        window.ReactDOM.createRoot(document.getElementById('root')).render(<App />);
     </script>
 </body>
 </html>
