@@ -41,9 +41,15 @@
             const [activeTab, setActiveTab] = useState(() => localStorage.getItem('tlc_active_tab') || 'Home');
             const [darkMode, setDarkMode] = useState(() => localStorage.getItem('tlc_dark_mode') === 'true');
             const [favorites, setFavorites] = useState(() => {
-                const cachedData = localStorage.getItem('tlc_favorites_v2');
-                return cachedData ? JSON.parse(cachedData) : [];
-            });
+    try {
+        const cachedData = localStorage.getItem('tlc_favorites_v2');
+        return cachedData ? JSON.parse(cachedData) : [];
+    } catch (e) {
+        // Data is corrupted – start fresh
+        localStorage.removeItem('tlc_favorites_v2');
+        return [];
+    }
+});
 
             const [searchQuery, setSearchQuery] = useState('');
             const [viewingCollection, setViewingCollection] = useState(false);
@@ -357,7 +363,7 @@
                                         <option value="Songs">Songs</option>
                                         <option value="Articles">Articles</option>
                                         <option value="London">London</option>
-                                        <option value="News in Tech">New in Tech</option>
+                                        <option value="New in Tech">New in Tech</option>
                                     </select>
                                 </div>
 
