@@ -774,8 +774,41 @@
             );
         };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        const rootEl = document.getElementById('root');
+
+try {
+    if (!rootEl) {
+        throw new Error("Root element not found");
+    }
+
+    const root = ReactDOM.createRoot(rootEl);
+    root.render(<App />);
+
+} catch (err) {
+    console.error("We're editing the app right now. Please try visiting us again later!", err);
+
+    rootEl.innerHTML = `
+        <div style="padding:20px;font-family:Arial;color:red">
+            <h2>Something broke while loading the site</h2>
+            <pre>${err.message}</pre>
+        </div>
+    `;
+}
     </script>
+    <script>
+window.addEventListener('error', (e) => {
+    console.error("Global error:", e.error);
+
+    const root = document.getElementById('root');
+    if (root && !root.innerHTML.trim()) {
+        root.innerHTML = `
+            <div style="padding:20px;font-family:Arial;color:red">
+                <h2>Runtime Error</h2>
+                <pre>${e.message}</pre>
+            </div>
+        `;
+    }
+});
+</script>
 </body>
 </html>
