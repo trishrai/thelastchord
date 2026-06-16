@@ -34,6 +34,7 @@
 </head>
 <body>
     <div id="root"></div>
+
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
@@ -135,7 +136,7 @@
                                 });
                                 setData(prev => ({ ...prev, [key]: cleanData.reverse() }));
                             },
-                            error: (err) => console.warn(`CSV loading fallback for ${key}:`, err)
+                            error: (err) => console.warn(`CSV loading error for ${key}:`, err)
                         });
                     }
                 });
@@ -737,21 +738,8 @@
             );
         };
 
-        // DOM verification layout wrapper to avoid script timing compilation deadlocks
-        document.addEventListener("DOMContentLoaded", () => {
-            const rootEl = document.getElementById('root');
-            if(rootEl) {
-                const root = ReactDOM.createRoot(rootEl);
-                root.render(<App />);
-            }
-        });
-        
-        // Immediate invocation fallback check
-        if(document.getElementById('root') && !window.tlcInitialized) {
-            window.tlcInitialized = true;
-            const root = ReactDOM.createRoot(document.getElementById('root'));
-            root.render(<App />);
-        }
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
 </body>
 </html>
