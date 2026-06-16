@@ -42,10 +42,15 @@
             const [darkMode, setDarkMode] = useState(() => localStorage.getItem('tlc_dark_mode') === 'true');
             const [favorites, setFavorites] = useState(() => {
     try {
-        const cachedData = localStorage.getItem('tlc_favorites_v2');
-        return cachedData ? JSON.parse(cachedData) : [];
+        const cached = localStorage.getItem('tlc_favorites_v2');
+
+        if (!cached || cached === "undefined") return [];
+
+        const parsed = JSON.parse(cached);
+
+        return Array.isArray(parsed) ? parsed : [];
     } catch (e) {
-        // Data is corrupted – start fresh
+        console.warn("Resetting corrupted favorites cache");
         localStorage.removeItem('tlc_favorites_v2');
         return [];
     }
@@ -125,18 +130,34 @@
             useEffect(() => {
                 Object.keys(CSV_LINKS).forEach(key => {
                     Papa.parse(CSV_LINKS[key], {
-                        download: true, header: true, skipEmptyLines: true,
-                        complete: (results) => {
-                            const cleanData = results.data.map(row => {
-                                const newRow = {};
-                                Object.keys(row).forEach(k => { newRow[k.toLowerCase().trim()] = row[k]; });
-                                return newRow;
-                            });
-                            setData(prev => ({ ...prev, [key]: cleanData.reverse() }));
-                        }
-                    });
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+
+    error: (err) => {
+        console.error(`CSV load failed for ${key}:`, err);
+    },
+
+    complete: (results) => {
+        try {
+            const cleanData = (results.data || []).map(row => {
+                const newRow = {};
+                Object.keys(row || {}).forEach(k => {
+                    newRow[k?.toLowerCase()?.trim?.() || k] = row[k];
                 });
-            }, []);
+                return newRow;
+            });
+
+            setData(prev => ({
+                ...prev,
+                [key]: cleanData.reverse()
+            }));
+        } catch (e) {
+            console.error(`Parsing crash in ${key}:`, e);
+        }
+    }
+});
+            
 
             const theme = {
                 bg: darkMode ? 'bg-[#121212]' : 'bg-[#D1E2F2]',
@@ -736,8 +757,26 @@
             );
         };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        ReactDOM.render(<App />, document.getElementById('root'));
     </script>
+    <script type="text/babel">
+const { useState, useEffect, useMemo } = React;
+
+const App = () => {
+    // (your entire App stays unchanged)
+};
+
+window.addEventListener("DOMContentLoaded", () => {
+    const rootElement = document.getElementById("root");
+
+    if (!rootElement) {
+        console.error("Root div not found");
+        return;
+    }
+
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(<App />);
+});
+</script>
 </body>
 </html>
