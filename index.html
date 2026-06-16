@@ -38,23 +38,18 @@
         const { useState, useEffect, useMemo } = React;
 
         const App = () => {
-            const [activeTab, setActiveTab] = useState(() => localStorage.getItem('tlc_active_tab') || 'Home');
-            const [darkMode, setDarkMode] = useState(() => localStorage.getItem('tlc_dark_mode') === 'true');
+            const [activeTab, setActiveTab] = useState(() => {
+                try { return localStorage.getItem('tlc_active_tab') || 'Home'; } catch(e) { return 'Home'; }
+            });
+            const [darkMode, setDarkMode] = useState(() => {
+                try { return localStorage.getItem('tlc_dark_mode') === 'true'; } catch(e) { return false; }
+            });
             const [favorites, setFavorites] = useState(() => {
-    try {
-        const cached = localStorage.getItem('tlc_favorites_v2');
-
-        if (!cached || cached === "undefined") return [];
-
-        const parsed = JSON.parse(cached);
-
-        return Array.isArray(parsed) ? parsed : [];
-    } catch (e) {
-        console.warn("Resetting corrupted favorites cache");
-        localStorage.removeItem('tlc_favorites_v2');
-        return [];
-    }
-});
+                try {
+                    const cachedData = localStorage.getItem('tlc_favorites_v2');
+                    return cachedData ? JSON.parse(cachedData) : [];
+                } catch(e) { return []; }
+            });
 
             const [searchQuery, setSearchQuery] = useState('');
             const [viewingCollection, setViewingCollection] = useState(false);
@@ -112,7 +107,7 @@
             };
 
             useEffect(() => {
-                localStorage.setItem('tlc_active_tab', activeTab);
+                try { localStorage.setItem('tlc_active_tab', activeTab); } catch(e){}
                 setSearchQuery(''); 
                 if (activeTab === 'Articles') {
                     setSelectedCategory('Landing'); 
@@ -120,74 +115,31 @@
             }, [activeTab]);
 
             useEffect(() => {
-                localStorage.setItem('tlc_dark_mode', darkMode);
+                try { localStorage.setItem('tlc_dark_mode', darkMode); } catch(e){}
             }, [darkMode]);
 
             useEffect(() => {
-                localStorage.setItem('tlc_favorites_v2', JSON.stringify(favorites));
+                try { localStorage.setItem('tlc_favorites_v2', JSON.stringify(favorites)); } catch(e){}
             }, [favorites]);
 
             useEffect(() => {
-    Object.keys(CSV_LINKS).forEach(key => {
-        Papa.parse(CSV_LINKS[key], {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
-
-            error: (err) => {
-                console.error(`CSV load failed for ${key}:`, err);
-            },
-
-            complete: (results) => {
-                try {
-                    const cleanData = (results.data || []).map(row => {
-                        const newRow = {};
-                        Object.keys(row || {}).forEach(k => {
-                            newRow[k?.toLowerCase()?.trim?.() || k] = row[k];
+                Object.keys(CSV_LINKS).forEach(key => {
+                    if (window.Papa) {
+                        Papa.parse(CSV_LINKS[key], {
+                            download: true, header: true, skipEmptyLines: true,
+                            complete: (results) => {
+                                const cleanData = results.data.map(row => {
+                                    const newRow = {};
+                                    Object.keys(row).forEach(k => { newRow[k.toLowerCase().trim()] = row[k]; });
+                                    return newRow;
+                                });
+                                setData(prev => ({ ...prev, [key]: cleanData.reverse() }));
+                            },
+                            error: (err) => console.warn(`CSV loading fallback for ${key}:`, err)
                         });
-                        return newRow;
-                    });
-
-                    setData(prev => ({
-                        ...prev,
-                        [key]: cleanData.reverse()
-                    }));
-                } catch (e) {
-                    console.error(`Parsing crash in ${key}:`, e);
-                }
-            }
-        });
-    });
-}, []);
-            
-    download: true,
-    header: true,
-    skipEmptyLines: true,
-
-    error: (err) => {
-        console.error(`CSV load failed for ${key}:`, err);
-    },
-
-    complete: (results) => {
-        try {
-            const cleanData = (results.data || []).map(row => {
-                const newRow = {};
-                Object.keys(row || {}).forEach(k => {
-                    newRow[k?.toLowerCase()?.trim?.() || k] = row[k];
+                    }
                 });
-                return newRow;
-            });
-
-            setData(prev => ({
-                ...prev,
-                [key]: cleanData.reverse()
-            }));
-        } catch (e) {
-            console.error(`Parsing crash in ${key}:`, e);
-        }
-    }
-});
-            
+            }, []);
 
             const theme = {
                 bg: darkMode ? 'bg-[#121212]' : 'bg-[#D1E2F2]',
@@ -341,7 +293,6 @@
                             <div className="flex justify-between items-start">
                                 <div className="w-full">
                                     <h3 className="font-serif text-3xl italic mb-2 pr-4">{title}</h3>
-                                    {/* Subtitle / Metadata details made larger */}
                                     <p className={`text-[12px] uppercase tracking-widest font-bold opacity-70 mb-4 border-b ${darkMode ? 'border-[#121212]/20' : 'border-[#E6F0FA]/20'} pb-3`}>
                                         {sub}
                                     </p>
@@ -349,7 +300,6 @@
                                 <span className="text-[8px] uppercase tracking-widest border border-current px-2.5 py-0.5 rounded opacity-50 shrink-0">{originTab === 'New In Tech' ? 'Tech' : originTab}</span>
                             </div>
                             
-                            {/* Metadata fields (Album, Year, Location) bumped up in font scale */}
                             <div className="mb-5 space-y-1.5 text-[12px] uppercase tracking-[0.15em] opacity-80 italic font-medium">
                                 {album && <p>Album: {album}</p>}
                                 {year && <p>Released: {year}</p>}
@@ -414,7 +364,7 @@
                                         <option value="Songs">Songs</option>
                                         <option value="Articles">Articles</option>
                                         <option value="London">London</option>
-                                        <option value="New in Tech">New in Tech</option>
+                                        <option value="News in Tech">New in Tech</option>
                                     </select>
                                 </div>
 
@@ -787,9 +737,21 @@
             );
         };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        // DOM verification layout wrapper to avoid script timing compilation deadlocks
+        document.addEventListener("DOMContentLoaded", () => {
+            const rootEl = document.getElementById('root');
+            if(rootEl) {
+                const root = ReactDOM.createRoot(rootEl);
+                root.render(<App />);
+            }
+        });
         
-</script>
+        // Immediate invocation fallback check
+        if(document.getElementById('root') && !window.tlcInitialized) {
+            window.tlcInitialized = true;
+            const root = ReactDOM.createRoot(document.getElementById('root'));
+            root.render(<App />);
+        }
+    </script>
 </body>
 </html>
