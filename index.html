@@ -41,9 +41,13 @@
             const [activeTab, setActiveTab] = useState(() => localStorage.getItem('tlc_active_tab') || 'Home');
             const [darkMode, setDarkMode] = useState(() => localStorage.getItem('tlc_dark_mode') === 'true');
             const [favorites, setFavorites] = useState(() => {
-                const cachedData = localStorage.getItem('tlc_favorites_v2');
-                return cachedData ? JSON.parse(cachedData) : [];
-            });
+    try {
+        const cachedData = localStorage.getItem('tlc_favorites_v2');
+        return cachedData ? JSON.parse(cachedData) : [];
+    } catch {
+        return [];
+    }
+});
 
             const [searchQuery, setSearchQuery] = useState('');
             const [viewingCollection, setViewingCollection] = useState(false);
