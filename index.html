@@ -13,8 +13,8 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="The Last Chord">
 
-    <script src="https://unpkg.com/preact@10.19.3/dist/preact.min.js"></script>
-    <script src="https://unpkg.com/preact@10.19.3/hooks/dist/hooks.umd.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/htm@3.1.1/dist/htm.umd.js"></script>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -37,13 +37,9 @@
     <div id="root"></div>
 
     <script>
-        // Bind HTM directly into Preact's architecture
-        const html = htm.bind(preact.h);
-        
-        // Pull down the reactive React-style state hooks mapping natively
-        const useState = preactHooks.useState;
-        const useEffect = preactHooks.useEffect;
-        const useMemo = preactHooks.useMemo;
+        // Connect HTM parser directly to React's engine
+        const html = htm.bind(React.createElement);
+        const { useState, useEffect, useMemo } = React;
 
         const App = () => {
             const [activeTab, setActiveTab] = useState(() => {
@@ -327,7 +323,7 @@
                                         class="border py-4 text-[9px] uppercase tracking-[0.4em] font-bold text-center transition-all ${
                                             darkMode 
                                                 ? 'bg-[#121212] text-[#F5EFE6] border-[#F5EFE6]/30 hover:bg-[#F5EFE6] hover:text-[#121212] hover:border-[#121212]' 
-                                                : 'bg-[#001F3F] text-[#E6F0FA] border-[#E6F0FA]/20 hover:bg-white hover:text-[#001F3F] hover:border-[#001F3F]'
+                                                : 'bg-[#001F3F] text-[#E6F0FA] border-[#E6F0FA]/20 hover:bg-white hover:text-[#001F3F]'
                                         }"
                                     >
                                         ${originTab === 'Songs' ? "Listen on Spotify" : originTab === 'Articles' ? "Read Publication" : "Website"}
@@ -730,7 +726,9 @@
             `;
         };
 
-        preact.render(html`<${App} />`, document.getElementById('root'));
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(html`<${App} />`);
     </script>
 </body>
 </html>
