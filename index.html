@@ -38,8 +38,21 @@
         const { useState, useEffect, useMemo } = React;
 
         const App = () => {
-            const [activeTab, setActiveTab] = useState(() => localStorage.getItem('tlc_active_tab') || 'Home');
-            const [darkMode, setDarkMode] = useState(() => localStorage.getItem('tlc_dark_mode') === 'true');
+            const [activeTab, setActiveTab] = useState(() => {
+    try {
+        return localStorage.getItem('tlc_active_tab') || 'Home';
+    } catch {
+        return 'Home';
+    }
+});
+
+const [darkMode, setDarkMode] = useState(() => {
+    try {
+        return localStorage.getItem('tlc_dark_mode') === 'true';
+    } catch {
+        return false;
+    }
+});
             const [favorites, setFavorites] = useState(() => {
     try {
         const cachedData = localStorage.getItem('tlc_favorites_v2');
@@ -104,21 +117,30 @@
                 }
             };
 
-            useEffect(() => {
-                localStorage.setItem('tlc_active_tab', activeTab);
-                setSearchQuery(''); 
-                if (activeTab === 'Articles') {
-                    setSelectedCategory('Landing'); 
-                }
-            }, [activeTab]);
+            // 1 – activeTab (keep the extra logic inside)
+useEffect(() => {
+    try {
+        localStorage.setItem('tlc_active_tab', activeTab);
+    } catch {}
+    setSearchQuery('');
+    if (activeTab === 'Articles') {
+        setSelectedCategory('Landing');
+    }
+}, [activeTab]);
 
-            useEffect(() => {
-                localStorage.setItem('tlc_dark_mode', darkMode);
-            }, [darkMode]);
+// 2 – darkMode
+useEffect(() => {
+    try {
+        localStorage.setItem('tlc_dark_mode', darkMode);
+    } catch {}
+}, [darkMode]);
 
-            useEffect(() => {
-                localStorage.setItem('tlc_favorites_v2', JSON.stringify(favorites));
-            }, [favorites]);
+// 3 – favorites
+useEffect(() => {
+    try {
+        localStorage.setItem('tlc_favorites_v2', JSON.stringify(favorites));
+    } catch {}
+}, [favorites]);
 
             useEffect(() => {
                 Object.keys(CSV_LINKS).forEach(key => {
