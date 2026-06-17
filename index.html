@@ -41,185 +41,190 @@
         const html = htm.bind(React.createElement);
         const { useState, useEffect, useMemo } = React;
 
-        const App = () => {
-            const [activeTab, setActiveTab] = useState(() => {
-                try { return localStorage.getItem('tlc_active_tab') || 'Home'; } catch(e) { return 'Home'; }
-            });
-            const [darkMode, setDarkMode] = useState(() => {
-                try { return localStorage.getItem('tlc_dark_mode') === 'true'; } catch(e) { return false; }
-            });
-            const [favorites, setFavorites] = useState(() => {
-                try {
-                    const cachedData = localStorage.getItem('tlc_favorites_v2');
-                    return cachedData ? JSON.parse(cachedData) : [];
-                } catch(e) { return []; }
-            });
+       window.NEWSLETTER_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw89WXffroQ3Og4ItQaAAAphGqzb5oM7fCJXUugnuDov_5VmQflwCC1Y2saJNMSx_4L/exec";
 
-            const [searchQuery, setSearchQuery] = useState('');
-            const [viewingCollection, setViewingCollection] = useState(false);
-            const [collectionSubFilter, setCollectionSubFilter] = useState('All');
-            const [selectedCategory, setSelectedCategory] = useState('Landing'); 
-            const [sortOrder, setSortOrder] = useState('newest'); 
-            const [hoveredCategory, setHoveredCategory] = useState(null); 
-            const [data, setData] = useState({ Songs: [], London: [], Articles: [], Tech: [] });
-            const [showAboutSection, setShowAboutSection] = useState(false);
+const App = () => {
+    const [activeTab, setActiveTab] = useState(() => {
+        try { return localStorage.getItem('tlc_active_tab') || 'Home'; } catch(e) { return 'Home'; }
+    });
+    const [darkMode, setDarkMode] = useState(() => {
+        try { return localStorage.getItem('tlc_dark_mode') === 'true'; } catch(e) { return false; }
+    });
+    const [favorites, setFavorites] = useState(() => {
+        try {
+            const cachedData = localStorage.getItem('tlc_favorites_v2');
+            return cachedData ? JSON.parse(cachedData) : [];
+        } catch(e) { return []; }
+    });
 
-            const [formData, setFormData] = useState({ firstName: '', lastName: '', citySelection: 'London', customCity: '', email: '' });
-            const [signupStatus, setSignupStatus] = useState('idle'); 
+    const [searchQuery, setSearchQuery] = useState('');
+    const [viewingCollection, setViewingCollection] = useState(false);
+    const [collectionSubFilter, setCollectionSubFilter] = useState('All');
+    const [selectedCategory, setSelectedCategory] = useState('Landing'); 
+    const [sortOrder, setSortOrder] = useState('newest'); 
+    const [hoveredCategory, setHoveredCategory] = useState(null); 
+    const [data, setData] = useState({ Songs: [], London: [], Articles: [], Tech: [] });
+    const [showAboutSection, setShowAboutSection] = useState(false);
 
-            const NEWSLETTER_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw89WXffroQ3Og4ItQaAAAphGqzb5oM7fCJXUugnuDov_5VmQflwCC1Y2saJNMSx_4L/exec";
+    const [formData, setFormData] = useState({ firstName: '', lastName: '', citySelection: 'London', customCity: '', email: '' });
+    const [signupStatus, setSignupStatus] = useState('idle'); 
 
-            const CSV_LINKS = {
-                Songs: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=0&single=true&output=csv",
-                London: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1791301794&single=true&output=csv",
-                Articles: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=116420010&single=true&output=csv",
-                Tech: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1956240315&single=true&output=csv"
-            };
+    // NOTE: Removed duplicate const NEWSLETTER_SCRIPT_URL variable from here to avoid naming confusion!
 
-            const CATEGORY_MAP = {
-                "The Last Chord": {
-                    title: "The Last Chord",
-                    pillBg: "bg-[#DDEBFA]", pillText: "text-[#1E40AF]",
-                    desc: "Welcome to The Last Chord. Read about our journey here.",
-                    cover: "https://trishrai.github.io/thelastchord/Logo.jpeg"
-                },
-                "Off The Record: Opinion Pieces": {
-                    title: "Off The Record: Opinion Pieces",
-                    pillBg: "bg-[#E2F0D9]", pillText: "text-[#2E7D32]",
-                    desc: "Welcome to Off the Record, where art meets insight. We offer sharp, unfiltered opinion pieces on cultural shifts, the evolution of sound, and the timeless debates shaping the industry.",
-                    cover: "https://github.com/trishrai/thelastchord/blob/main/opinions.jpeg?raw=true"
-                },
-                "The Sonic Lens: Analysis": {
-                    title: "The Sonic Lens: Analysis",
-                    pillBg: "bg-[#F3E5F5]", pillText: "text-[#6A1B9A]",
-                    desc: "Welcome to The Sonic Lens. We examine the intersection of art, culture, and society through a critical eye. From the evolution of musical traditions to the impact of iconic movements, we offer thought-provoking analysis on how art shapes our world.",
-                    cover: "https://github.com/trishrai/thelastchord/blob/main/analysis.jpeg?raw=true"
-                },
-                "Studio Sessions: Interviews": {
-                    title: "Studio Sessions: Interviews",
-                    pillBg: "bg-[#E0F2F1]", pillText: "text-[#00695C]",
-                    desc: "Welcome to Studio Sessions, where creativity meets conversation. We interview musicians, writers, and visual creators to uncover the stories behind their art. Dive deep into the processes, struggles, and passions that drive the creative world.",
-                    cover: "https://github.com/trishrai/thelastchord/blob/main/Interviews.jpeg?raw=true"
-                },
-                "Soundcheck: Reviews": {
-                    title: "Soundcheck: Reviews",
-                    pillBg: "bg-[#FCE4EC]", pillText: "text-[#C2185B]",
-                    desc: "Welcome to Soundcheck, the reviews section of The Last Chord. We cover albums, films, art, and culture that leave a mark. Beyond simple critiques, we unpack the storytelling, rebellion, and raw emotion behind every piece.",
-                    cover: "https://github.com/trishrai/thelastchord/blob/main/reviews.jpeg?raw=true"
-                }
-            };
+    const CSV_LINKS = {
+        Songs: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=0&single=true&output=csv",
+        London: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1791301794&single=true&output=csv",
+        Articles: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=116420010&single=true&output=csv",
+        Tech: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyk-CW-uRScOp42schBcPTBMBIfu8RtGJtDlNkmn2fHnvqoI5GiXKEYiYv62nzVk6aemxQp7cdCamh/pub?gid=1956240315&single=true&output=csv"
+    };
 
-            useEffect(() => {
-                try { localStorage.setItem('tlc_active_tab', activeTab); } catch(e){}
-                setSearchQuery(''); 
-                if (activeTab === 'Articles') {
-                    setSelectedCategory('Landing'); 
-                }
-            }, [activeTab]);
+    const CATEGORY_MAP = {
+        "The Last Chord": {
+            title: "The Last Chord",
+            pillBg: "bg-[#DDEBFA]", pillText: "text-[#1E40AF]",
+            desc: "Welcome to The Last Chord. Read about our journey here.",
+            cover: "https://trishrai.github.io/thelastchord/Logo.jpeg"
+        },
+        "Off The Record: Opinion Pieces": {
+            title: "Off The Record: Opinion Pieces",
+            pillBg: "bg-[#E2F0D9]", pillText: "text-[#2E7D32]",
+            desc: "Welcome to Off the Record, where art meets insight. We offer sharp, unfiltered opinion pieces on cultural shifts, the evolution of sound, and the timeless debates shaping the industry.",
+            cover: "https://github.com/trishrai/thelastchord/blob/main/opinions.jpeg?raw=true"
+        },
+        "The Sonic Lens: Analysis": {
+            title: "The Sonic Lens: Analysis",
+            pillBg: "bg-[#F3E5F5]", pillText: "text-[#6A1B9A]",
+            desc: "Welcome to The Sonic Lens. We examine the intersection of art, culture, and society through a critical eye. From the evolution of musical traditions to the impact of iconic movements, we offer thought-provoking analysis on how art shapes our world.",
+            cover: "https://github.com/trishrai/thelastchord/blob/main/analysis.jpeg?raw=true"
+        },
+        "Studio Sessions: Interviews": {
+            title: "Studio Sessions: Interviews",
+            pillBg: "bg-[#E0F2F1]", pillText: "text-[#00695C]",
+            desc: "Welcome to Studio Sessions, where creativity meets conversation. We interview musicians, writers, and visual creators to uncover the stories behind their art. Dive deep into the processes, struggles, and passions that drive the creative world.",
+            cover: "https://github.com/trishrai/thelastchord/blob/main/Interviews.jpeg?raw=true"
+        },
+        "Soundcheck: Reviews": {
+            title: "Soundcheck: Reviews",
+            pillBg: "bg-[#FCE4EC]", pillText: "text-[#C2185B]",
+            desc: "Welcome to Soundcheck, the reviews section of The Last Chord. We cover albums, films, art, and culture that leave a mark. Beyond simple critiques, we unpack the storytelling, rebellion, and raw emotion behind every piece.",
+            cover: "https://github.com/trishrai/thelastchord/blob/main/reviews.jpeg?raw=true"
+        }
+    };
 
-            useEffect(() => {
-                try { localStorage.setItem('tlc_dark_mode', darkMode); } catch(e){}
-            }, [darkMode]);
+    useEffect(() => {
+        try { localStorage.setItem('tlc_active_tab', activeTab); } catch(e){}
+        setSearchQuery(''); 
+        if (activeTab === 'Articles') {
+            setSelectedCategory('Landing'); 
+        }
+    }, [activeTab]);
 
-            useEffect(() => {
-                try { localStorage.setItem('tlc_favorites_v2', JSON.stringify(favorites)); } catch(e){}
-            }, [favorites]);
+    useEffect(() => {
+        try { localStorage.setItem('tlc_dark_mode', darkMode); } catch(e){}
+    }, [darkMode]);
 
-            useEffect(() => {
-                Object.keys(CSV_LINKS).forEach(key => {
-                    if (window.Papa) {
-                        window.Papa.parse(CSV_LINKS[key], {
-                            download: true, header: true, skipEmptyLines: true,
-                            complete: (results) => {
-                                const cleanData = results.data.map(row => {
-                                    const newRow = {};
-                                    Object.keys(row).forEach(k => { newRow[k.toLowerCase().trim()] = row[k]; });
-                                    return newRow;
-                                });
-                                setData(prev => ({ ...prev, [key]: cleanData.reverse() }));
-                            },
-                            error: (err) => console.warn(err)
+    useEffect(() => {
+        try { localStorage.setItem('tlc_favorites_v2', JSON.stringify(favorites)); } catch(e){}
+    }, [favorites]);
+
+    useEffect(() => {
+        Object.keys(CSV_LINKS).forEach(key => {
+            if (window.Papa) {
+                window.Papa.parse(CSV_LINKS[key], {
+                    download: true, header: true, skipEmptyLines: true,
+                    complete: (results) => {
+                        const cleanData = results.data.map(row => {
+                            const newRow = {};
+                            Object.keys(row).forEach(k => { newRow[k.toLowerCase().trim()] = row[k]; });
+                            return newRow;
                         });
-                    }
+                        setData(prev => ({ ...prev, [key]: cleanData.reverse() }));
+                    },
+                    error: (err) => console.warn(err)
                 });
-            }, []);
+            }
+        });
+    }, []);
 
-            const theme = {
-                bg: darkMode ? 'bg-[#121212]' : 'bg-[#D1E2F2]',
-                navBg: darkMode ? 'bg-[#121212]/90' : 'bg-[#D1E2F2]/90',
-                footerBg: darkMode ? 'bg-[#121212]/95' : 'bg-[#D1E2F2]/95',
-                text: darkMode ? 'text-[#F5EFE6]' : 'text-[#001F3F]',
-                border: darkMode ? 'border-[#F5EFE6]/20' : 'border-[#001F3F]/30',
-                pillBorder: darkMode ? 'border-[#F5EFE6]' : 'border-[#001F3F]',
-                cardBg: darkMode ? 'bg-[#1C1C1E]' : 'bg-white',
-                layoutGrid: darkMode ? 'bg-[#F5EFE6]/10' : 'bg-[#001F3F]/10',
-                placeholderBg: darkMode ? 'bg-[#F5EFE6]/5' : 'bg-[#001F3F]/5'
-            };
+    const theme = {
+        bg: darkMode ? 'bg-[#121212]' : 'bg-[#D1E2F2]',
+        navBg: darkMode ? 'bg-[#121212]/90' : 'bg-[#D1E2F2]/90',
+        footerBg: darkMode ? 'bg-[#121212]/95' : 'bg-[#D1E2F2]/95',
+        text: darkMode ? 'text-[#F5EFE6]' : 'text-[#001F3F]',
+        border: darkMode ? 'border-[#F5EFE6]/20' : 'border-[#001F3F]/30',
+        pillBorder: darkMode ? 'border-[#F5EFE6]' : 'border-[#001F3F]',
+        cardBg: darkMode ? 'bg-[#1C1C1E]' : 'bg-white',
+        layoutGrid: darkMode ? 'bg-[#F5EFE6]/10' : 'bg-[#001F3F]/10',
+        placeholderBg: darkMode ? 'bg-[#F5EFE6]/5' : 'bg-[#001F3F]/5'
+    };
 
-            const getPageHeader = (tab) => {
-                if (viewingCollection) return "YOUR MASTER COLLECTION DECK";
-                if (tab === 'Home') return "";
-                switch(tab) {
-                    case 'Songs': return "SONG RECOMMENDATIONS FROM THE LAST CHORD";
-                    case 'London': return "LONDON RECOMMENDATIONS FROM THE LAST CHORD";
-                    case 'Articles': return "NEW FROM THE LAST CHORD";
-                    case 'New In Tech': return "TECHNOLOGY NEWS FROM OTHER OUTLETS";
-                    default: return "";
-                }
-            };
+    const getPageHeader = (tab) => {
+        if (viewingCollection) return "YOUR MASTER COLLECTION DECK";
+        if (tab === 'Home') return "";
+        switch(tab) {
+            case 'Songs': return "SONG RECOMMENDATIONS FROM THE LAST CHORD";
+            case 'London': return "LONDON RECOMMENDATIONS FROM THE LAST CHORD";
+            case 'Articles': return "NEW FROM THE LAST CHORD";
+            case 'New In Tech': return "TECHNOLOGY NEWS FROM OTHER OUTLETS";
+            default: return "";
+        }
+    };
 
-            const toggleFavorite = (item, originTab) => {
-                const title = item.title || item.name || "Untitled";
-                const compositeKey = `${originTab}-${title}`;
-                
-                setFavorites(prev => {
-                    const exists = prev.some(f => f.compositeKey === compositeKey);
-                    if (exists) {
-                        return prev.filter(f => f.compositeKey !== compositeKey);
-                    } else {
-                        return [...prev, { compositeKey, originTab, data: item }];
-                    }
-                });
-            };
+    const toggleFavorite = (item, originTab) => {
+        const title = item.title || item.name || "Untitled";
+        const compositeKey = `${originTab}-${title}`;
+        
+        setFavorites(prev => {
+            const exists = prev.some(f => f.compositeKey === compositeKey);
+            if (exists) {
+                return prev.filter(f => f.compositeKey !== compositeKey);
+            } else {
+                return [...prev, { compositeKey, originTab, data: item }];
+            }
+        });
+    };
 
-            const isItemSaved = (itemTitle, originTab) => {
-                return favorites.some(f => f.compositeKey === `${originTab}-${itemTitle}`);
-            };
+    const isItemSaved = (itemTitle, originTab) => {
+        return favorites.some(f => f.compositeKey === `${originTab}-${itemTitle}`);
+    };
 
-            const handleFormChange = (e) => {
-                const { name, value } = e.target;
-                setFormData(prev => ({ ...prev, [name]: value }));
-            };
+    const handleFormChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
 
-            const handleSubscribe = async (e) => {
-                e.preventDefault();
-                if (!formData.email.trim()) return;
+    const handleSubscribe = async (e) => {
+        e.preventDefault();
+        if (!formData.email.trim()) return;
 
-                const resolvedCity = formData.citySelection === 'Other' ? formData.customCity : formData.citySelection;
+        const resolvedCity = formData.citySelection === 'Other' ? formData.customCity : formData.citySelection;
 
-                const payload = {
-                    firstName: formData.firstName,
-                    lastName: formData.lastName,
-                    city: resolvedCity || 'Other',
-                    email: formData.email
-                };
+        const payload = {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            city: resolvedCity || 'Other',
+            email: formData.email
+        };
 
-                setSignupStatus('loading');
-                try {
-                    await fetch(NEWSLETTER_SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    
-                    setSignupStatus('success');
-                    setFormData({ firstName: '', lastName: '', citySelection: 'London', customCity: '', email: '' });
-                } catch (error) {
-                    setSignupStatus('error');
-                    console.error(error);
-                }
-            };
+        console.log("🚀 Submitting payload to macro URL:", window.NEWSLETTER_SCRIPT_URL);
+        console.log("Payload data:", payload);
+
+        setSignupStatus('loading');
+        try {
+            await fetch(window.NEWSLETTER_SCRIPT_URL, {
+                method: 'POST',
+                // Tricking pre-flight requirements to bypass CORS blocking:
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+                body: JSON.stringify(payload)
+            });
+            
+            setSignupStatus('success');
+            setFormData({ firstName: '', lastName: '', citySelection: 'London', customCity: '', email: '' });
+        } catch (error) {
+            setSignupStatus('error');
+            console.error("❌ Fetch failed:", error);
+        }
+    };
 
             const filteredStandardItems = useMemo(() => {
                 const currentTabKey = activeTab === 'New In Tech' ? 'Tech' : activeTab;
